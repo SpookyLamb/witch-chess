@@ -1,21 +1,11 @@
-import { Link } from "react-router-dom"
-
-const Title = () => {
-  return (
-    <h1>
-      Hello World!
-    </h1>
-  )
-}
+import Game from "./Game"
 
 function App() {
   return (
     <div className="p-5">
-      <Link to='/about'>About</Link>
-      <Title />
+      <Game/>
     </div>
   )
 }
-
 
 export default App
