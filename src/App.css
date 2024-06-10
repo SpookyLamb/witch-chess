@@ -17,6 +17,8 @@ body {
 }
 
 .game-square {
+  min-height: 100px;
+  min-width: 100px;
   height: 100px;
   width: 100px;
   border-style: solid;

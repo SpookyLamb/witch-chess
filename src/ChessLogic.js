@@ -1,6 +1,6 @@
 
 
-function validateMove(piece, startPosition, endPosition, color, boardState) {
+export function validateMove(piece, startPosition, endPosition, boardState) {
     //recieves a piece code
         //K - King
         //Q - Queen
@@ -8,8 +8,9 @@ function validateMove(piece, startPosition, endPosition, color, boardState) {
         //B - Bishop
         //R - Rook
         //P - Pawn
-    //its starting position (A1-H8)
-    //its ending position (also A1-H8)
+    //starts with either a "w" or "b" for color
+    //its starting coordinates (A1-H8)
+    //its ending coordinates (also A1-H8)
     //the color of the side performing the move (only really relevant for pawns)
     //and the current board state, including the current positions of every piece
 
@@ -23,6 +24,7 @@ function validateMove(piece, startPosition, endPosition, color, boardState) {
     // A2 B2 C2 D2 E2 F2 G2 H2
     // A1 B1 C1 D1 E1 F1 G1 H1 - white side
     //columns are letters, rows are numbers
+    //RECEIVED column is still a number, though
 
     //matches piece and then does validation logic based on that
     
@@ -34,27 +36,26 @@ function validateMove(piece, startPosition, endPosition, color, boardState) {
     //the queen is mostly unrestricted, moving like either a bishop or a rook
     //the king can only move to squares within one space, but otherwise without restriction
 
-    
-
     //also needs to handle special moves like castling and en passant
+    return true //TEMP
 }
 
-function validMoves() {
+export function validMoves() {
     //takes a piece, its starting position, the current board state, and then sends back all squares that would be valid moves for that piece
 }
 
-function validateCheck() {
+export function validateCheck() {
 
 }
 
-function validateWin() {
+export function validateWin() {
 
 }
 
-function validateSpell() { //validates spells, not piece movement
+export function validateSpell() { //validates spells, not piece movement
 
 }
 
-function validSpellcasts() {
+export function validSpellcasts() {
     //takes a spell and the current board state and sends back all the possible valid moves for that spell
 }
