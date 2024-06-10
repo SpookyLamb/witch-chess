@@ -383,13 +383,41 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             }
 
             break;
+
+        case "K":
+            //the king can only move to unoccupied squares within one space, in any direction
+
+            if (startCol + 1 === endCol || startCol - 1 === endCol || startCol === endCol) {
+                if (startRow + 1 === endRow || startRow - 1 === endRow || startRow === endRow) {
+                    //continue...
+                } else {
+                    console.log("The King can only move one space at a time! 2")
+                    return false
+                }
+            } else {
+                console.log("The King can only move one space at a time! 1")
+                return false
+            }
+
+            //the main restriction on the king's movement is that he cannot move into any square that's threatened by an enemy piece
+            //this is complex, but is also a problem that has to be solved via checking the new position for, well, check
+            let white
+            if (color === "w") { white = true } else { white = false }
+
+            let check = validateCheck(white, endRow, endCol, boardState)
+            
+            if (check) {
+                console.log("The King can't move into a space where he'd be threatened!")
+                return false
+            } //else, continue...
+
+            break;
+
         default:
             console.error("Bad piece code!?")
             return false //no idea what's going on if it ever hits this, just throw
     }
     
-    //the king can only move to squares within one space, but otherwise without restriction
-
     //also needs to handle special moves like en passant, pawn promotion, castling
 
     return true //if we make it all the way through without rejecting the move, it's valid
@@ -399,8 +427,279 @@ export function validMoves() {
     //takes a piece, its starting position, the current board state, and then sends back all squares that would be valid moves for that piece
 }
 
-export function validateCheck() {
+export function validateCheck(white, kingRow, kingCol, boardState) {
+    //checks whether or not a given king is in check
+    //white is whether or not the king in question is white - true if so, false if black
+    //KingPos is a [row, column] array showing the current position of the king
+    //boardState is the current (or imminent future, in case of King Movement) state of the board
+    //needs to return true if the king is in check, false if the king isn't
 
+    //needs to check for the following enemy pieces:
+        //pawns diagonally in front of (above for white king, below for black king) the king 
+        //knights within an L shape
+        //bishops or queens within a diagonal
+        //rooks or queens within an orthogonal
+        //kings within 1 space of each other (this should only be possible for predictive moves)
+    //this algorithm should check OUTWARD from the king's position, and when checking orthogonals or diagonals, STOP upon encountering a friendly piece (bodyguard)
+
+    let king
+    let otherKing
+    if (white) {
+        king = "wK"
+        otherKing = "bK"
+    } else {
+        king = "bK"
+        otherKing = "wK"
+    }
+
+    let friend
+    if (white) {
+        friend = "w"
+    } else {
+        friend = "b"
+    }
+
+    let enemy //secret tool, etc
+    let piece
+    let blockers
+
+    //needs to check the following "knight spots" for enemy knights
+    // - N - N - = 1, 2
+    // N - - - N = 3, 4 
+    // - - K - -
+    // N - - - N = 5, 6
+    // - N - N - = 7, 8
+    
+    const knightSpots = {
+        1: [kingRow + 2, kingCol - 1],
+        2: [kingRow + 2, kingCol + 1],
+        3: [kingRow + 1, kingCol - 2],
+        4: [kingRow + 1, kingCol + 2],
+        5: [kingRow - 1, kingCol - 2],
+        6: [kingRow - 1, kingCol + 2],
+        7: [kingRow - 2, kingCol - 1],
+        8: [kingRow - 2, kingCol + 1],
+    }
+    
+    if (white) { //set enemy to look for
+        enemy = "bN"
+    } else {
+        enemy = "wN"
+    }
+
+    //note that we can ignore any space that would be "out of bounds", aka out of the range of 1-8 for rows, and 0-7 for columns
+    for (let i = 1; i <= 8; i++) {
+        let coords = knightSpots[i]
+        let knightRow = coords[0]
+        let knightCol = coords[1]
+
+        //out of bounds check
+        if (knightRow > 8 || knightRow < 1) {
+            continue
+        }
+        if (knightCol > 7 || knightCol < 0) {
+            continue
+        }
+
+        piece = boardState[knightRow][knightCol]
+
+        if (piece === enemy) { //danger knight found!!
+            return true
+        }
+    }
+
+    //orthogonals (rooks, queen)
+
+    if (white) { //set enemies to look for and blockers
+        enemy = ["bR", "bQ"]
+        blockers = ["bB", "bN", "bP", "bK"]
+    } else {
+        enemy = ["wR", "wQ"]
+        blockers = ["wB", "wN", "wP", "wK"]
+    }
+
+    //left of king
+    for (let i = kingCol; i >= 0; i--) {
+        piece = boardState[kingRow][i]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! rook/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+    }
+
+    //right of king
+    for (let i = kingCol; i <= 7; i++) {
+        piece = boardState[kingRow][i]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! rook/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+    }
+
+    //above king
+    for (let i = kingRow; i <= 8; i++) {
+        piece = boardState[i][kingCol]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! rook/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+    }
+
+    //below king
+    for (let i = kingRow; i >= 1; i--) {
+        piece = boardState[i][kingCol]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! rook/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+    }
+
+    //diagonals (bishops, queen)
+    if (white) { //set enemies to look for and blockers
+        enemy = ["bB", "bQ"]
+        blockers = ["bR", "bN", "bP", "bK"]
+    } else {
+        enemy = ["wB", "wQ"]
+        blockers = ["wR", "wN", "wP", "wK"]
+    }
+
+    let j = kingCol
+    //up-right of king
+    for (let i = kingRow; i <= 8; i++) {
+        if (j < 0 || j > 7) {
+            break; //out of bounds
+        }
+
+        piece = boardState[i][j]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+
+        j++
+    }
+
+    j = kingCol
+    //up-left of king
+    for (let i = kingRow; i <= 8; i++) {
+        if (j < 0 || j > 7) {
+            break; //out of bounds
+        }
+
+        piece = boardState[i][j]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+
+        j--
+    }
+
+    j = kingCol
+    //down-right of king
+    for (let i = kingRow; i >= 1; i--) {
+        if (j < 0 || j > 7) {
+            break; //out of bounds
+        }
+
+        piece = boardState[i][j]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+
+        j++
+    }
+
+    j = kingCol
+    //down-left of king
+    for (let i = kingRow; i >= 1; i--) {
+        if (j < 0 || j > 7) {
+            break; //out of bounds
+        }
+
+        piece = boardState[i][j]
+
+        if (piece === king) { //skip itself
+            continue
+        } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
+            return true
+        } else if (piece.startsWith(friend) || blockers.includes(piece)) { //bodyguard
+            break;
+        }
+
+        j--
+    }
+
+    //huggers (pawns, the OTHER king)
+    //needs to check the spaces immediately diagonally in front of (depending on color) the king
+    if (white) {
+        let pawn1 = boardState[kingRow + 1][kingCol + 1]
+        let pawn2 = boardState[kingRow + 1][kingCol - 1]
+        
+        if (pawn1 === "bP" || pawn2 === "bP") { //danger pawn!!
+            return true
+        }
+    } else {
+        let pawn1 = boardState[kingRow - 1][kingCol + 1]
+        let pawn2 = boardState[kingRow - 1][kingCol - 1]
+        
+        if (pawn1 === "wP" || pawn2 === "wP") { //danger pawn!!
+            return true
+        }
+    }
+
+    //needs to check the spaces immediately around the king for the other king
+    for (let i = kingCol - 1; i <= kingCol + 1; i++) { //flip j and i's usual roles because I'm feeling spicy
+        if (i < 0 || i > 7) {
+            continue //out of bounds, ignore
+        }
+
+        for (let j = kingRow - 1; j <= kingRow + 1; j++) {
+            if (j < 1 || j > 8) {
+                continue //out of bounds, ignore
+            }
+
+            piece = boardState[j][i]
+
+            if (piece === king) { //skip itself
+                continue
+            } else if (piece === otherKing) { //ultimate danger!! enemy king!!!
+                return true
+            }
+        }
+    }
+
+    //if nothing trips above, return false
+    return false
 }
 
 export function validateWin() {
