@@ -1,4 +1,27 @@
 
+function findKing(white, boardState) {
+    //finds a given king's position
+
+    let kingToFind
+
+    if (white) {
+        kingToFind = "wK"
+    } else {
+        kingToFind = "bK"
+    }
+
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            let piece = boardState[i][j]
+
+            if (piece === kingToFind) {
+                return [i, j]
+            }
+        }
+    }
+
+}
+
 function checkBlockers(startPosition, endPosition, boardState) {
     //function (dumbly) takes the start and ending positions and checks if there are blockers in the way
     //doesn't consider if the movement is valid for the piece, it assumes that has already been checked
@@ -403,25 +426,30 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
 
             //the main restriction on the king's movement is that he cannot move into any square that's threatened by an enemy piece
             //this is complex, but is also a problem that has to be solved via checking the new position for, well, check
-            let white
-            if (color === "w") { white = true } else { white = false }
-
-            //"move" the king in our copy state
-            copyState[startRow][startCol] = ""
-            copyState[endRow][endCol] = pieceCode
-
-            let check = validateCheck(white, endRow, endCol, copyState)
-            
-            if (check) {
-                console.log("The King can't move into a space where he'd be threatened!")
-                return false
-            } //else, continue...
+            //this is done BELOW this switch statement in the general check validation
 
             break;
 
         default:
             console.error("Bad piece code!?")
             return false //no idea what's going on if it ever hits this, just throw
+    }
+
+
+    //need to check for, well, check, because any move that puts the king in check can't be done!
+    let white
+    if (color === "w") { white = true } else { white = false }
+
+    //"move" the considered piece in our copy state, then check for check
+    copyState[startRow][startCol] = ""
+    copyState[endRow][endCol] = pieceCode
+    let kingSpace = findKing(white, copyState);
+
+    let check = validateCheck(white, kingSpace[0], kingSpace[1], copyState)
+    
+    if (check) {
+        console.log("You can't let the King be threatened!")
+        return false
     }
     
     //also needs to handle special moves like en passant, pawn promotion, castling
@@ -589,14 +617,12 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
 
     let j = kingCol
     //up-right of king
-    console.log(kingRow, kingCol)
     for (let i = kingRow; i <= 8; i++) {
         if (j < 0 || j > 7) {
             break; //out of bounds
         }
 
         piece = boardState[i][j]
-        console.log(i, j + 1, piece)
 
         if (piece === king) { //skip itself
             j++
