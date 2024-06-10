@@ -4,7 +4,7 @@ import Col from "react-bootstrap/Col"
 import { useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
-import { validateMove } from "./ChessLogic"
+import { validateMove, validateWin } from "./ChessLogic"
 
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
 
@@ -55,7 +55,7 @@ function Board() {
     function squareClicked(row, column) { //responds to a game square being clicked, designating that square as the "active" square, provided a piece is present
         let piece = boardState[row][column]
 
-        console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
+        //console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
 
         if (activeSquare[0] === 0) { //no currently active square if row is 0
             //check the clicked square to see if it has a piece, via boardState
@@ -132,6 +132,16 @@ function Board() {
                     {rowElements}
                 </Row>
             )
+        }
+
+        //while we're here, go ahead and check for a victory
+        let winner = validateWin(true, newBoardState) //TEMP SHOULD CHECK WHITE OR BLACK, CURRENTLY ONLY WHITE
+        if (winner) { //empty string means no winner
+            if (winner === "draw") {
+                alert("Stalemate!")
+            } else {
+                alert(winner + " has won the game!")
+            }
         }
     }
 

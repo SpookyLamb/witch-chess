@@ -416,11 +416,11 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 if (startRow + 1 === endRow || startRow - 1 === endRow || startRow === endRow) {
                     //continue...
                 } else {
-                    console.log("The King can only move one space at a time! 2")
+                    console.log("The King can only move one space at a time!")
                     return false
                 }
             } else {
-                console.log("The King can only move one space at a time! 1")
+                console.log("The King can only move one space at a time!")
                 return false
             }
 
@@ -455,10 +455,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     //also needs to handle special moves like en passant, pawn promotion, castling
 
     return true //if we make it all the way through without rejecting the move, it's valid
-}
-
-export function validMoves() {
-    //takes a piece, its starting position, the current board state, and then sends back all squares that would be valid moves for that piece
 }
 
 export function validateCheck(white, kingRow, kingCol, boardState) {
@@ -754,7 +750,68 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
     return false
 }
 
-export function validateWin() {
+function legalMoves(pieceCode, startPosition, boardState) {
+    //takes a piece, position, and board, and returns an array of all legal moves (end positions) that it can perform
+    let moves = []
+
+    for (let row = 1; row <= 8; row++) {
+        for (let col = 0; col <= 7; col++) {
+            let valid = validateMove(pieceCode, startPosition, [row, col], boardState)
+
+            if (valid) {
+                moves.push([row, col])
+            }
+        }
+    }
+
+    return moves
+}
+
+export function validateWin(white, boardState) {
+    //checks if a given player has any remaining legal moves
+    //if not, and their king is IN CHECK, the other player wins
+    //if their king is NOT in check, the game is a draw
+    //needs to return one of: "white", "black", or "draw" depending on who won, OR an empty string if there's no conclusion
+
+    //to accomplish this, we'll do it in a very unoptimized way:
+    //iterate over the whole board, grabbing each piece matching the provided player
+    //then iterate over the whole board again, simulating moves for that piece
+    //repeat until a legal move is found, or there are none left
+
+    //if *any* legal moves are found, return an empty string, the game is still on
+
+    let friend = "b"
+    if (white) {
+        friend = "w"
+    }
+
+    for (let row = 1; row <= 8; row++) {
+        for (let col = 0; col <= 7; col++) {
+            let piece = boardState[row][col]
+
+            if (piece.startsWith(friend)) {
+                let moves = legalMoves(piece, [row, col], boardState)
+
+                if (moves.length > 0) {
+                    return "" //legal moves found, game is still on
+                } //else, continue
+            }
+        }
+    }
+
+    //if we get through that loop without returning, then the game is over, be it a draw or a win
+    let king = findKing(white, boardState)
+    let check = validateCheck(white, king[0], king[1], boardState)
+
+    if (check) { //checkmate
+        if (white) {
+            return "black"
+        } else {
+            return "white"
+        }
+    } else { //draw
+        return "draw"
+    }
 
 }
 
