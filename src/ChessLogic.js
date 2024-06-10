@@ -143,6 +143,8 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
 
     const endPiece = boardState[endRow][endCol]
 
+    let copyState = structuredClone(boardState) //get a mutable copy of boardState
+
     //startPosition is starting coordinates (A1-H8), a 2-element array
     //its ending coordinates (also A1-H8), also a 2-element array
 
@@ -404,7 +406,11 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             let white
             if (color === "w") { white = true } else { white = false }
 
-            let check = validateCheck(white, endRow, endCol, boardState)
+            //"move" the king in our copy state
+            copyState[startRow][startCol] = ""
+            copyState[endRow][endCol] = pieceCode
+
+            let check = validateCheck(white, endRow, endCol, copyState)
             
             if (check) {
                 console.log("The King can't move into a space where he'd be threatened!")
@@ -428,6 +434,8 @@ export function validMoves() {
 }
 
 export function validateCheck(white, kingRow, kingCol, boardState) {
+    console.log(boardState)
+
     //checks whether or not a given king is in check
     //white is whether or not the king in question is white - true if so, false if black
     //KingPos is a [row, column] array showing the current position of the king
@@ -581,14 +589,17 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
 
     let j = kingCol
     //up-right of king
+    console.log(kingRow, kingCol)
     for (let i = kingRow; i <= 8; i++) {
         if (j < 0 || j > 7) {
             break; //out of bounds
         }
 
         piece = boardState[i][j]
+        console.log(i, j + 1, piece)
 
         if (piece === king) { //skip itself
+            j++
             continue
         } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
             return true
@@ -609,6 +620,7 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
         piece = boardState[i][j]
 
         if (piece === king) { //skip itself
+            j--
             continue
         } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
             return true
@@ -629,6 +641,7 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
         piece = boardState[i][j]
 
         if (piece === king) { //skip itself
+            j++
             continue
         } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
             return true
@@ -649,6 +662,7 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
         piece = boardState[i][j]
 
         if (piece === king) { //skip itself
+            j--
             continue
         } else if (enemy.includes(piece)) { //danger!! bishop/queen approaching!!
             return true
@@ -662,15 +676,27 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
     //huggers (pawns, the OTHER king)
     //needs to check the spaces immediately diagonally in front of (depending on color) the king
     if (white) {
-        let pawn1 = boardState[kingRow + 1][kingCol + 1]
-        let pawn2 = boardState[kingRow + 1][kingCol - 1]
+        let pawn1 = ""
+        if (kingRow + 1 <= 8 && kingCol + 1 <= 7) {
+            pawn1 = boardState[kingRow + 1][kingCol + 1]
+        }
+        let pawn2 = ""
+        if (kingRow + 1 <= 8 && kingCol - 1 >= 0) {
+            pawn2 = boardState[kingRow + 1][kingCol - 1]
+        }
         
         if (pawn1 === "bP" || pawn2 === "bP") { //danger pawn!!
             return true
         }
     } else {
-        let pawn1 = boardState[kingRow - 1][kingCol + 1]
-        let pawn2 = boardState[kingRow - 1][kingCol - 1]
+        let pawn1 = ""
+        if (kingRow - 1 >= 1 && kingCol + 1 <= 7) {
+            pawn1 = boardState[kingRow - 1][kingCol + 1]
+        }
+        let pawn2 = ""
+        if (kingRow - 1 >= 1 && kingCol - 1 >= 0) {
+            pawn2 = boardState[kingRow - 1][kingCol - 1]
+        }
         
         if (pawn1 === "wP" || pawn2 === "wP") { //danger pawn!!
             return true
