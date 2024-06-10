@@ -349,13 +349,45 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             
             break;
 
+        case "Q":
+            //the queen is the most unrestricted, moving like EITHER a bishop or a rook, but not both
+            
+            if (startCol !== endCol && startRow !== endRow) { //moving like a bishop
+                let h_shift = 0
+                let v_shift = 0
+    
+                if (startRow < endRow) { //up/down
+                    v_shift = endRow - startRow
+                } else {
+                    v_shift = startRow - endRow
+                }
+    
+                if (startCol < endCol) { //left/right
+                    h_shift = endCol - startCol
+                } else {
+                    h_shift = startCol - endCol
+                }
+    
+                if (h_shift !== v_shift) {
+                    console.log("Queens can only move diagonally on a straight line!")
+                    return false
+                }
+            } //else, moving like a rook, which we don't need to double check
+
+            //despite her mighty power, the queen still can't "jump" other pieces
+            blocked = checkBlockers(startPosition, endPosition, boardState)
+
+            if (blocked) {
+                console.log("Queen movement blocked!")
+                return false
+            }
+
+            break;
         default:
             console.error("Bad piece code!?")
             return false //no idea what's going on if it ever hits this, just throw
     }
     
-    
-    //the queen is mostly unrestricted, moving like either a bishop or a rook
     //the king can only move to squares within one space, but otherwise without restriction
 
     //also needs to handle special moves like en passant, pawn promotion, castling
