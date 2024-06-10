@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { validateMove } from "./ChessLogic"
 
-let activeSquare = [0,0] //coordinates of the active square, 0 in either means no active square
+let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
 
 function Square(props) {
     //game square, an 8x8 grid of 64 of these makes up the whole game board
@@ -57,7 +57,7 @@ function Board() {
 
         console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
 
-        if (activeSquare[0] === 0 || activeSquare[1] === 0) { //no currently active square
+        if (activeSquare[0] === 0) { //no currently active square if row is 0
             //check the clicked square to see if it has a piece, via boardState
             if (piece) { //empty strings (aka, no piece) are false
                 activeSquare = [row, column] //set the active square
@@ -71,17 +71,20 @@ function Board() {
                 activeSquare = [0,0]
                 console.log("Active square reset!")
             } else { //new square, check if it has a valid move
-                let valid = validateMove(piece, activeSquare, [row, column], boardState)
+                
                 let copyState = structuredClone(boardState) //get a mutable copy
+                let activeX = activeSquare[0]
+                let activeY = activeSquare[1]
+                let activePiece = copyState[ activeX ][ activeY ]
+
+                let valid = validateMove(activePiece, activeSquare, [row, column], boardState)
 
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
                     console.log("Valid move!")
-                    let activeX = activeSquare[0]
-                    let activeY = activeSquare[1]
 
                     //place the piece in its new position
-                    let activePiece = copyState[ activeX ][ activeY ]
+                    
                     copyState[row][column] = activePiece
 
                     //remove the piece from its old position
@@ -94,6 +97,7 @@ function Board() {
                     activeSquare = [0,0]
                 } else {
                     console.log("Invalid move!")
+                    activeSquare = [0,0] //reset, try again
                     return //ignore the move, as it is invalid
                 }
             }
