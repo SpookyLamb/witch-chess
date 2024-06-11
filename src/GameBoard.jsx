@@ -4,7 +4,7 @@ import Col from "react-bootstrap/Col"
 import { useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkPromotion, validateMove, validateWin } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin } from "./ChessLogic"
 
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
 
@@ -100,16 +100,21 @@ function Board() {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
                     console.log("Valid move!")
 
-                    let capturedPiece = copyState[row][column]
+                    //handle captures
+                    let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
+                    
+                    let captures
+                    if (turn === "White") {
+                        captures = Array.from(whiteCaptures)
+                    } else {
+                        captures = Array.from(blackCaptures)
+                    }
 
                     if (capturedPiece) { //piece captured
-                        let captures
                         if (turn === "White") {
-                            captures = Array.from(whiteCaptures)
                             captures.push(capturedPiece)
                             setWhiteCaptures(captures)
                         } else {
-                            captures = Array.from(blackCaptures)
                             captures.push(capturedPiece)
                             setBlackCaptures(captures)
                         }
@@ -121,8 +126,23 @@ function Board() {
                     //remove the piece from its old position
                     copyState[activeX][activeY] = "" //empty string is no piece
                     
-                    //check for pawn promotion, and set the new state
-                    setBoardState(checkPromotion(copyState)) // setBoardState(copyState)
+                    //check for special moves
+                    let result = checkSpecialMoves(copyState, boardState) //returns a two element array with the new board state and any flanked pawns
+                    let flank = result[1]
+
+                    //handle flanked pieces from en passant
+                    if (flank) {
+                        if (turn === "White") {
+                            captures.push(flank)
+                            setWhiteCaptures(captures)
+                        } else {
+                            captures.push(flank)
+                            setBlackCaptures(captures)
+                        }
+                    }
+                    
+                    //set the new state
+                    setBoardState(result[0]) //forward the current and previous board states
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]

@@ -144,7 +144,56 @@ function checkBlockers(startPosition, endPosition, boardState) {
     }
 }
 
-export function checkPromotion(boardState) {
+export function checkSpecialMoves(boardState, prevState) {
+    //"boardState" is a mutable copy, "prevState" is read-only
+
+    let flankResult = checkFlank(boardState) //checks if en passant has been executed, notes the captured pawn
+    boardState = flankResult[0]
+    let flank = flankResult[1]
+
+    boardState = checkPromotion(boardState) //checks for pawn promotion
+    boardState = checkPassant(boardState, prevState) //marks pawns vulnerable to en passant
+
+    return [boardState, flank]
+}
+
+function checkFlank(boardState) {
+    //needs to check rows 4 (for white pawns) and 5 (for black pawns) with Xs (vulnerable to en passant)
+    //if any are found, needs to check rows 3 (for black pawns capturing white pawns) and 6 (for white pawns capturing black pawns)
+    let flank = ""
+    
+    for (let i = 0; i <= 7; i++) { //white pawns
+        let piece = boardState[4][i]
+
+        if (piece === "wPx") {
+            let capPiece = boardState[3][i]
+            if (capPiece === "bP") {
+                //edit the board state for the capture and return
+                boardState[4][i] = ""
+                flank = "wP"
+                return [boardState, flank]
+            }
+        }
+    }
+
+    for (let i = 0; i <= 7; i++) { //black pawns
+        let piece = boardState[5][i]
+
+        if (piece === "bPx") {
+            let capPiece = boardState[6][i]
+            if (capPiece === "wP") {
+                //edit the board state for the capture and return
+                boardState[5][i] = ""
+                flank = "bP"
+                return [boardState, flank]
+            }
+        }
+    }
+
+    return [boardState, flank]
+}
+
+function checkPromotion(boardState) {
     //checks if any pawns have been promoted
     //we lazily convert these to queens without a choice - underpromotion isn't permitted in WITCH CHESS
 
@@ -175,6 +224,63 @@ export function checkPromotion(boardState) {
     }
 
     return copyState
+}
+
+function checkPassant(curState, prevState) {
+    //recieves the previous and (a copy of) the current board state
+    //can edit (and return) the copy/current state, previous state is read-only
+
+    //checks to see if a pawn has recently moved forward two tiles
+    //if so, an "x" is added to that pawn's Piece Code (this is done second)
+    //also checks if any pawn that has an X has survived the prior turn, removing the X (this is done first)
+    //pawns with Xs are treated differently by validate move for the special move En Passant
+
+    //iterate across the whole board, grabbing any pawns with xs and scrubbing them
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            let piece = curState[i][j]
+            
+            if (piece === "wPx") {
+                curState[i][j] = "wP"
+            } else if (piece === "bPx") {
+                curState[i][j] = "bP"
+            }
+        }
+    }
+
+    //now check for any pawns that have NEWLY moved two tiles, and give them an X
+    //only needs to check rows 4, 5 (in curState) and 2, 7 (in prevState) for white and black pawns, respectively
+    let row4 = curState[4]
+    let row2 = prevState[2]
+
+    for (let i = 0; i < row4.length; i++) {
+        let piece = row4[i]
+        if (piece === "wP") { //potential pawn found
+            //check if the pawn was in its starting position previously
+            if (row2[i] === "wP") {
+                //if so, add an X
+                row4[i] = "wPx"
+                curState[4] = row4
+            }
+        }
+    }
+
+    //as above, so below
+    let row5 = curState[5]
+    let row7 = prevState[7]
+
+    for (let i = 0; i < row5.length; i++) {
+        let piece = row5[i]
+        if (piece === "bP") {
+            if (row7[i] === "bP") {
+                row5[i] = "bPx"
+                curState[5] = row5
+            }
+        }
+    }
+
+    //return the altered state at the end
+    return curState
 }
 
 export function validateMove(pieceCode, startPosition, endPosition, boardState) {
@@ -229,12 +335,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     let white //note color
     if (color === "w") { white = true } else { white = false }
 
-    //note a capture attempt
-    let capturing = false
-    if (endPiece) {
-        capturing = true
-    }
-
     let blocked = false //a secret tool that will help us later
 
     //matches piece and then does validation logic based on that
@@ -245,15 +345,36 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //pawns can only move forward one space, except on their starting row, where they can move forward two
             //they CANNOT move forward if the space they're moving to is occupied -- they stop in place
             //they instead CAPTURE diagonally, which is also the only time they can move across columns
+            
             //they ALSO have two special moves only for them: promotion and en passant
             //promotion is handled in another function, called directly by the game board
-            //en passant is handled here, however
+            //en passant is tracked elsewhere (checkPassant), but is handled here
 
             let start = false
             if (startRow === 2 || startRow === 7) {
                 start = true //starting pawns move forward two, note that this applies to the enemy row, but it doesn't matter (only one space ahead at that point)
             }
             
+            //note a capture attempt, THIS IS WHERE WE CHECK FOR PASSANT
+            let capturing = false
+            if (endPiece) {
+                capturing = true
+            } else {
+                //check the spot BEHIND "endPiece", and if it's an enemy pawn with an X, we're passanting
+                if (white && endRow - 1 >= 1) { //white pawn
+                    let piece = boardState[endRow - 1][endCol]
+                    if (piece === "bPx") {
+                        capturing = true
+                    } //else, whatever
+                } else if (endRow + 1 <= 8) { //black pawn
+                    let piece = boardState[endRow + 1][endCol]
+                    if (piece === "wPx") {
+                        capturing = true
+                    }
+                }
+                //the actual capture is handled by the game board as usual
+            }
+
             //check forward movement
             //"forward" in this case is determined by color, white goes UP in rows to go forward, black goes DOWN to go forward
             if (color === "w") {
