@@ -188,7 +188,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     //first check if the color of the endPosition piece matches the active piece, if it does, immediately reject (you can't capture your own pieces)
     if (endPiece) { //empty strings always eval to true with startsWith, so we need to filter those out
         if (endPiece.startsWith(color)) {
-            console.log("Can't capture own pieces.")
+            //console.log("Can't capture own pieces.")
             return false
         }
     }
@@ -224,15 +224,15 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                     //need to make sure there's nothing in the pawn's way, they can't jump pieces like the Knight
                     let blockerPiece = boardState[startRow + 1][startCol]
                     if (blockerPiece) {
-                        console.log("Pawn movement blocked!")
+                        //console.log("Pawn movement blocked!")
                         return false 
                     } else if (capturing) {
-                        console.log("Pawns can't capture with their starting movement!")
+                        //console.log("Pawns can't capture with their starting movement!")
                         return false
                     }
                     //else, continue...
                 } else {
-                    console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
+                    //console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
                     return false //invalid white pawn move
                 }
             } else if (color === "b") {
@@ -242,15 +242,15 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                     //need to make sure there's nothing in the pawn's way, they can't jump pieces like the Knight
                     let blockerPiece = boardState[startRow - 1][startCol]
                     if (blockerPiece) {
-                        console.log("Pawn movement blocked!")
+                        //console.log("Pawn movement blocked!")
                         return false 
                     } else if (capturing) {
-                        console.log("Pawns can't capture with their starting movement!")
+                        //console.log("Pawns can't capture with their starting movement!")
                         return false
                     }
                     //else, continue...
                 } else {
-                    console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
+                    //console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
                     return false //invalid black pawn move
                 }
             }
@@ -258,19 +258,19 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //if the pawn is moving to an empty square, then we just need to make sure it's staying in it's lane
             if (capturing) { //but if it's moving to an OCCUPIED square...
                 if (startCol === endCol) {
-                    console.log("Pawns can't capture directly in front of them.")
+                    //console.log("Pawns can't capture directly in front of them.")
                     return false 
                 } else if (startCol - 1 === endCol || startCol + 1 === endCol) {
                     //continue...
                 } else {
-                    console.log("Pawns can't move diagonally more than one square!")
+                    //console.log("Pawns can't move diagonally more than one square!")
                     return false
                 }
             } else { //stay in your lane
                 if (startCol === endCol) {
                     //continue...
                 } else {
-                    console.log("Pawns can only move horizontally when capturing!")
+                    //console.log("Pawns can only move horizontally when capturing!")
                     return false
                 }
             }
@@ -285,18 +285,18 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 if (startRow + 1 === endRow || startRow - 1 === endRow) {
                     //continue...
                 } else {
-                    console.log("Knights only move in L shapes!")
+                    //console.log("Knights only move in L shapes!")
                     return false
                 }
             } else if (startRow + 2 === endRow || startRow - 2 === endRow) {
                 if (startCol + 1 === endCol || startCol - 1 === endCol) {
                     //continue...
                 } else {
-                    console.log("Knights only move in L shapes!")
+                    //console.log("Knights only move in L shapes!")
                     return false
                 }
             } else {
-                console.log("Knights only move in L shapes!")
+                //console.log("Knights only move in L shapes!")
                 return false
             }
 
@@ -315,7 +315,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             } else if (startRow === endRow && startCol !== endCol) {
                 //continue...
             } else {
-                console.log("Rooks can only move orthogonally!")
+                //console.log("Rooks can only move orthogonally!")
                 return false
             }
 
@@ -324,7 +324,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                console.log("Rook movement blocked!")
+                //console.log("Rook movement blocked!")
                 return false
             }
 
@@ -334,10 +334,10 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //bishops move diagonally - they can't end their turn with EITHER the column or row matching their starting position
 
             if (startCol === endCol) {
-                console.log("Bishops can't move vertically!")
+                //console.log("Bishops can't move vertically!")
                 return false
             } else if (startRow === endRow ) {
-                console.log("Bishops can't move horizontally!")
+                //console.log("Bishops can't move horizontally!")
                 return false
             }
 
@@ -358,7 +358,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             }
 
             if (h_shift !== v_shift) {
-                console.log("Bishops can only move diagonally on a straight line!")
+                //console.log("Bishops can only move diagonally on a straight line!")
                 return false
             }
 
@@ -368,7 +368,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                console.log("Bishop movement blocked!")
+                //console.log("Bishop movement blocked!")
                 return false
             }
             
@@ -394,7 +394,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 }
     
                 if (h_shift !== v_shift) {
-                    console.log("Queens can only move diagonally on a straight line!")
+                    //console.log("Queens can only move diagonally on a straight line!")
                     return false
                 }
             } //else, moving like a rook, which we don't need to double check
@@ -403,7 +403,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                console.log("Queen movement blocked!")
+                //console.log("Queen movement blocked!")
                 return false
             }
 
@@ -416,11 +416,11 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 if (startRow + 1 === endRow || startRow - 1 === endRow || startRow === endRow) {
                     //continue...
                 } else {
-                    console.log("The King can only move one space at a time!")
+                    //console.log("The King can only move one space at a time!")
                     return false
                 }
             } else {
-                console.log("The King can only move one space at a time!")
+                //console.log("The King can only move one space at a time!")
                 return false
             }
 
@@ -448,7 +448,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     let check = validateCheck(white, kingSpace[0], kingSpace[1], copyState)
     
     if (check) {
-        console.log("You can't let the King be threatened!")
+        //console.log("You can't let the King be threatened!")
         return false
     }
     
@@ -458,7 +458,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
 }
 
 export function validateCheck(white, kingRow, kingCol, boardState) {
-    console.log(boardState)
 
     //checks whether or not a given king is in check
     //white is whether or not the king in question is white - true if so, false if black
@@ -805,12 +804,12 @@ export function validateWin(white, boardState) {
 
     if (check) { //checkmate
         if (white) {
-            return "black"
+            return "Black"
         } else {
-            return "white"
+            return "White"
         }
     } else { //draw
-        return "draw"
+        return "Draw"
     }
 
 }

@@ -50,6 +50,8 @@ function Board() {
         // A, B, C, D, E, F, G, H
     })
 
+    const [turn, setTurn] = useState("White")
+
     let boardElements = []
 
     function squareClicked(row, column) { //responds to a game square being clicked, designating that square as the "active" square, provided a piece is present
@@ -60,6 +62,16 @@ function Board() {
         if (activeSquare[0] === 0) { //no currently active square if row is 0
             //check the clicked square to see if it has a piece, via boardState
             if (piece) { //empty strings (aka, no piece) are false
+                //check to make sure the piece matches the player currently moving
+                if (turn === "White") {
+                    if (!piece.startsWith("w")) {
+                        return //can't move a black piece on white's turn
+                    }
+                } else {
+                    if (!piece.startsWith("b")) {
+                        return //can't move a white piece on black's turn
+                    }
+                }
                 activeSquare = [row, column] //set the active square
                 console.log("Active square set!")
             } else { //square doesn't have a piece
@@ -95,6 +107,13 @@ function Board() {
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]
+
+                    //and flip whos turn it is
+                    if (turn === "White") {
+                        setTurn("Black")
+                    } else {
+                        setTurn("White")
+                    }
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
@@ -106,12 +125,13 @@ function Board() {
     }
 
     function fillBoardElements(newBoardState) { //fills out the board visuals row by row
-        //TO FLIP DRAW DIRECTION (and thus which side is on the bottom on a player's screen), FLIP ORDER OF ITERATION, so decrement i instead of incrementing i
-        //the OPPOSITE must be done with the other iterator (j) to properly mirror the board
 
-        //console.log(boardState)
+        //by default, draws as though the player is white
+        //TO FLIP DRAW DIRECTION (and thus which side is on the bottom on a player's screen), FLIP ORDER OF ITERATION, so increment i instead of decrementing i
+        //the OPPOSITE must be done with the other iterator (j) to properly mirror the board, as though it was physically turned
+        //this only affects the visuals - gameplay and calculations are identical regardless
 
-        for (let i = 1; i <= 8; i++) { //row loop
+        for (let i = 8; i >= 1; i--) { //row loop
             let rowArray = newBoardState[i]
             let rowElements = []
 
@@ -134,13 +154,32 @@ function Board() {
             )
         }
 
-        //while we're here, go ahead and check for a victory
-        let winner = validateWin(true, newBoardState) //TEMP SHOULD CHECK WHITE OR BLACK, CURRENTLY ONLY WHITE
+        //while we're here (and we know state has updated), go ahead and check for a victory
+        let white
+        if (turn === "White") { 
+            white = true
+        } else {
+            white = false
+        }
+
+        let winner = validateWin(white, newBoardState)
         if (winner) { //empty string means no winner
-            if (winner === "draw") {
+            if (winner === "Draw") {
                 alert("Stalemate!")
             } else {
                 alert(winner + " has won the game!")
+
+                //reset the board
+                setBoardState({
+                    8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+                    7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"], 
+                    6: ["", "", "", "", "", "", "", ""],
+                    5: ["", "", "", "", "", "", "", ""],
+                    4: ["", "", "", "", "", "", "", ""],
+                    3: ["", "", "", "", "", "", "", ""],
+                    2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+                    1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"], })
+                setTurn("White")
             }
         }
     }
@@ -150,6 +189,7 @@ function Board() {
     return (
         <Container className="game-board">
             {boardElements}
+            <div>{turn} to move.</div>
         </Container>
     )
 }
