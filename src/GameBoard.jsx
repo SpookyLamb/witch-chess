@@ -4,7 +4,7 @@ import Col from "react-bootstrap/Col"
 import { useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 
-import { validateMove, validateWin } from "./ChessLogic"
+import { checkPromotion, validateMove, validateWin } from "./ChessLogic"
 
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
 
@@ -102,8 +102,8 @@ function Board() {
                     //remove the piece from its old position
                     copyState[activeX][activeY] = "" //empty string is no piece
                     
-                    //set the new state
-                    setBoardState(copyState)
+                    //check for pawn promotion, and set the new state
+                    setBoardState(checkPromotion(copyState)) // setBoardState(copyState)
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]
@@ -114,6 +114,7 @@ function Board() {
                     } else {
                         setTurn("White")
                     }
+                    
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again

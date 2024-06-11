@@ -144,6 +144,39 @@ function checkBlockers(startPosition, endPosition, boardState) {
     }
 }
 
+export function checkPromotion(boardState) {
+    //checks if any pawns have been promoted
+    //we lazily convert these to queens without a choice - underpromotion isn't permitted in WITCH CHESS
+
+    let copyState = structuredClone(boardState)
+
+    //needs to check row 8 for white pawns and row 1 for black pawns
+    let whiteRow = copyState[1]
+    let blackRow = copyState[8]
+
+    for (let i = 0; i < whiteRow.length; i++) { //black pawns are promoted here
+        const piece = whiteRow[i]
+
+        if (piece === "bP") {
+            whiteRow[i] = "bQ"
+            copyState[1] = whiteRow
+            break; //can't promote more than one piece per turn
+        }
+    }
+
+    for (let i = 0; i < blackRow.length; i++) { //white pawns are promoted here
+        const piece = blackRow[i]
+
+        if (piece === "wP") {
+            blackRow[i] = "wQ"
+            copyState[8] = blackRow
+            break; //can't promote more than one piece per turn
+        }
+    }
+
+    return copyState
+}
+
 export function validateMove(pieceCode, startPosition, endPosition, boardState) {
     //recieves a piece code
         //K - King
@@ -193,6 +226,9 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
         }
     }
 
+    let white //note color
+    if (color === "w") { white = true } else { white = false }
+
     //note a capture attempt
     let capturing = false
     if (endPiece) {
@@ -209,6 +245,8 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //pawns can only move forward one space, except on their starting row, where they can move forward two
             //they CANNOT move forward if the space they're moving to is occupied -- they stop in place
             //they instead CAPTURE diagonally, which is also the only time they can move across columns
+            //they ALSO have two special moves only for them: promotion and en passant
+            //promotion is handled elsewhere
 
             let start = false
             if (startRow === 2 || startRow === 7) {
@@ -437,9 +475,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
 
 
     //need to check for, well, check, because any move that puts the king in check can't be done!
-    let white
-    if (color === "w") { white = true } else { white = false }
-
     //"move" the considered piece in our copy state, then check for check
     copyState[startRow][startCol] = ""
     copyState[endRow][endCol] = pieceCode
