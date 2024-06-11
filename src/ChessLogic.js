@@ -153,8 +153,53 @@ export function checkSpecialMoves(boardState, prevState) {
 
     boardState = checkPromotion(boardState) //checks for pawn promotion
     boardState = checkPassant(boardState, prevState) //marks pawns vulnerable to en passant
+    boardState = checkCastle(boardState, prevState) //checks for castles
 
     return [boardState, flank]
+}
+
+function checkCastle(boardState, prevState) {
+    //checks if a castle has occurred and adjusts the position of the king and rook accordingly
+    //a castle has occurred if:
+        //a king is (virtually) in a rook's starting position (the corners of the board)
+        //the king was (previously) in his starting position
+    //if both are true, we can adjust the board, otherwise we leave it as-is
+
+    let whiteKing = findKing(true, boardState)
+    let prevWhiteKing = findKing(true, prevState)
+
+    if (prevWhiteKing[0] === 1 && prevWhiteKing[1] === 4) { //previous king in correct spot
+        if (whiteKing[0] === 1 && whiteKing[1] === 0 || whiteKing[1] === 7) { //current king in correct spot
+            if (whiteKing[1] === 0) { //queenside
+                boardState[1][2] = "wK"
+                boardState[1][3] = "wR"
+                boardState[1][0] = ""
+            } else { //kingside
+                boardState[1][6] = "wK"
+                boardState[1][5] = "wR"
+                boardState[1][7] = ""
+            }
+        }
+    }
+
+    let blackKing = findKing(false, boardState)
+    let prevBlackKing = findKing(false, prevState)
+
+    if (prevBlackKing[0] === 8 && prevBlackKing[1] === 4) { //previous king in correct spot
+        if (blackKing[0] === 8 && blackKing[1] === 0 || blackKing[1] === 7) { //current king in correct spot
+            if (blackKing[1] === 0) { //queenside
+                boardState[8][2] = "bK"
+                boardState[8][3] = "bR"
+                boardState[8][0] = ""
+            } else { //kingside
+                boardState[8][6] = "bK"
+                boardState[8][5] = "bR"
+                boardState[8][7] = ""
+            }
+        }
+    }
+
+    return boardState
 }
 
 function checkFlank(boardState) {
@@ -324,16 +369,52 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     //rows are numbers, as listed
     //columns are also numbers: 0-7, corresponding to A-H
 
+    let white //note color
+    if (color === "w") { white = true } else { white = false }
+
     //first check if the color of the endPosition piece matches the active piece, if it does, immediately reject (you can't capture your own pieces)
     if (endPiece) { //empty strings always eval to true with startsWith, so we need to filter those out
         if (endPiece.startsWith(color)) {
-            //console.log("Can't capture own pieces.")
-            return false
+            //we need to check for castling, the one exception to this rule
+            if (piece === "K") { //possible castle
+                //verify the king is on its starting square
+                //and that its "target tile" is the starting tile of a rook of the same color, and said rook is still there
+                if (white) { //white king
+                    if (startRow === 1 && startCol === 4 && endRow === 1) { //valid king position
+                        //check the rook...
+                        if (endPiece === "wR") { //valid piece
+                            if (endCol === 0 || endCol === 7) { //valid rook position
+                                //continued in the switch statement...
+                            } else { //invalid rook position
+                                return false
+                            }
+                        } else { //invalid piece
+                            return false
+                        }
+                    } else { //invalid king position
+                        return false
+                    }
+                } else { //black king
+                    if (startRow === 8 && startCol === 4 && endRow === 8) { //valid king position
+                        //check the rook...
+                        if (endPiece === "bR") { //valid piece
+                            if (endCol === 0 || endCol === 7) { //valid rook position
+                                //continued in the switch statement...
+                            } else { //invalid rook position
+                                return false
+                            }
+                        } else { //invalid piece
+                            return false
+                        }
+                    } else { //invalid king position
+                        return false
+                    }
+                }
+            } else { //not a castle
+                return false
+            }
         }
     }
-
-    let white //note color
-    if (color === "w") { white = true } else { white = false }
 
     let blocked = false //a secret tool that will help us later
 
@@ -571,17 +652,78 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
 
         case "K":
             //the king can only move to unoccupied squares within one space, in any direction
+            //EXCEPT... when castling, which is a special move only the king can do
+            let castling = false
 
             if (startCol + 1 === endCol || startCol - 1 === endCol || startCol === endCol) {
                 if (startRow + 1 === endRow || startRow - 1 === endRow || startRow === endRow) {
                     //continue...
                 } else {
+                    //check for castling, anything other than a valid castle returns false from here
+                    castling = true
+                }
+            } else {
+                //check for castling, anything other than a valid castle returns false from here
+                castling = true
+            }
+
+            if (castling) {
+                let validCastle = true
+
+                //consists of moving the king two squares toward a rook on the same rank and then moving the rook to the square that the king passed over
+                //permitted only if:
+                    //neither the king nor the rook has previously moved;
+                        //unfortunately coding a check like that is hard and outside the scope of this function,
+                        //so we'll just assume that if the king and rook are both in their starting positions, they haven't moved
+                    //the squares between the king and the rook are vacant;
+                    //and the king does not leave, cross over, or finish on a square attacked by an enemy piece;
+                        //which means we need to check for all three (start, skip, stop) of those squares
+                
+                //to check, in order:
+                    //verify the king is on its starting square
+                    //its "target tile" is the starting tile of a rook of the same color, and said rook is still there
+                //these first two conditions are checked way above in the initial capture check
+
+                //all the tiles in between the rook's and king's starting spaces are empty
+                let blocked = checkBlockers([startRow, startCol], [endRow, endCol], boardState)
+                if (blocked) {
+                    validCastle = false
+                }
+
+                //none of the three tiles the king moves through would cause him to be "in check"
+                if (validCastle) {
+                    let shift = 0 //direction of motion
+                    if (startCol < endCol) {
+                        shift = 2
+                    } else {
+                        shift = -2
+                    }
+
+                    let kingCopy1 = structuredClone(boardState) //starting space
+                    let kingSpace = findKing(white, kingCopy1);
+                    let check1 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
+                    
+                    kingCopy1[startRow][startCol] = "" 
+                    kingCopy1[endRow][startCol + (shift / 2)] = pieceCode //skipped space
+                    kingSpace = findKing(white, kingCopy1)
+                    let check2 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
+
+                    let kingCopy2 = structuredClone(boardState) 
+                    kingCopy2[startRow][startCol] = ""
+                    kingCopy2[endRow][startCol + shift] = pieceCode //end space
+                    kingSpace = findKing(white, kingCopy2)
+                    let check3 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy2)
+
+                    if (check1 || check2 || check3) {
+                        validCastle = false
+                    }
+                }
+
+                if (!validCastle) { //invalid castle or other illegal move
                     //console.log("The King can only move one space at a time!")
                     return false
                 }
-            } else {
-                //console.log("The King can only move one space at a time!")
-                return false
+                //afterwards, the special move function will notice that a castle happened and move the king/rook accordingly
             }
 
             //the main restriction on the king's movement is that he cannot move into any square that's threatened by an enemy piece

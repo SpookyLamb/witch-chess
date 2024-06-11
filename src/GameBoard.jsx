@@ -112,11 +112,15 @@ function Board() {
 
                     if (capturedPiece) { //piece captured
                         if (turn === "White") {
-                            captures.push(capturedPiece)
-                            setWhiteCaptures(captures)
+                            if (capturedPiece !== "wR") {
+                                captures.push(capturedPiece)
+                                setWhiteCaptures(captures)
+                            }
                         } else {
-                            captures.push(capturedPiece)
-                            setBlackCaptures(captures)
+                            if (capturedPiece !== "bR") {
+                                captures.push(capturedPiece)
+                                setBlackCaptures(captures)
+                            }
                         }
                     }
 
