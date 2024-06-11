@@ -50,9 +50,14 @@ function Board() {
         // A, B, C, D, E, F, G, H
     })
 
+    const [whiteCaptures, setWhiteCaptures] = useState([]) //black pieces captured by white
+    const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
+
     const [turn, setTurn] = useState("White")
 
     let boardElements = []
+    let cappedWhite = []
+    let cappedBlack = []
 
     function squareClicked(row, column) { //responds to a game square being clicked, designating that square as the "active" square, provided a piece is present
         let piece = boardState[row][column]
@@ -95,8 +100,22 @@ function Board() {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
                     console.log("Valid move!")
 
+                    let capturedPiece = copyState[row][column]
+
+                    if (capturedPiece) { //piece captured
+                        let captures
+                        if (turn === "White") {
+                            captures = Array.from(whiteCaptures)
+                            captures.push(capturedPiece)
+                            setWhiteCaptures(captures)
+                        } else {
+                            captures = Array.from(blackCaptures)
+                            captures.push(capturedPiece)
+                            setBlackCaptures(captures)
+                        }
+                    }
+
                     //place the piece in its new position
-                    
                     copyState[row][column] = activePiece
 
                     //remove the piece from its old position
@@ -114,7 +133,7 @@ function Board() {
                     } else {
                         setTurn("White")
                     }
-                    
+
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
@@ -155,6 +174,29 @@ function Board() {
             )
         }
 
+        //fill our captures while we're at it
+        for (const capturedPiece of whiteCaptures) {
+            cappedWhite.push(
+                <>
+                    <div>
+                        {capturedPiece}
+                    </div>
+                    <br/>
+                </>
+            )
+        }
+
+        for (const capturedPiece of blackCaptures) {
+            cappedBlack.push(
+                <>
+                    <div>
+                        {capturedPiece}
+                    </div>
+                    <br/>
+                </>
+            )
+        }
+
         //while we're here (and we know state has updated), go ahead and check for a victory
         let white
         if (turn === "White") { 
@@ -188,9 +230,21 @@ function Board() {
     fillBoardElements(boardState)
 
     return (
-        <Container className="game-board">
-            {boardElements}
-            <div>{turn} to move.</div>
+        <Container>
+            <Row>
+                <Col id="black-captures" className="text-end">
+                    {cappedBlack}
+                </Col>
+                <Col>
+                    <Container className="game-board">
+                        {boardElements}
+                        <div>{turn} to move.</div>
+                    </Container>
+                </Col>
+                <Col id="white-captures">
+                    {cappedWhite}
+                </Col>
+            </Row>
         </Container>
     )
 }

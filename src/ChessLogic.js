@@ -246,11 +246,12 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //they CANNOT move forward if the space they're moving to is occupied -- they stop in place
             //they instead CAPTURE diagonally, which is also the only time they can move across columns
             //they ALSO have two special moves only for them: promotion and en passant
-            //promotion is handled elsewhere
+            //promotion is handled in another function, called directly by the game board
+            //en passant is handled here, however
 
             let start = false
             if (startRow === 2 || startRow === 7) {
-                start = true //pawns can move forward two, note that this does apply to the enemy's row too, but that doesn't matter (only one space ahead)
+                start = true //starting pawns move forward two, note that this applies to the enemy row, but it doesn't matter (only one space ahead at that point)
             }
             
             //check forward movement
