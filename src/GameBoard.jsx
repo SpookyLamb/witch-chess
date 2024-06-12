@@ -201,23 +201,19 @@ function Board() {
         //fill our captures while we're at it
         for (const capturedPiece of whiteCaptures) {
             cappedWhite.push(
-                <>
-                    <div>
-                        {capturedPiece}
-                    </div>
+                <div key={uuidv4()}>
+                    {capturedPiece}
                     <br/>
-                </>
+                </div>
             )
         }
 
         for (const capturedPiece of blackCaptures) {
             cappedBlack.push(
-                <>
-                    <div>
-                        {capturedPiece}
-                    </div>
+                <div key={uuidv4()}>
+                    {capturedPiece}
                     <br/>
-                </>
+                </div>
             )
         }
 

@@ -16,15 +16,16 @@ import ErrorPage from './ErrorPage'
 import Header from './Header'
 import Footer from './Footer'
 
+import { AuthContext } from './authContext'
+import { useState } from 'react'
+import { useEffect } from 'react'
 
 function Layout() {
   return (
       <>
-        <Header />
         <div id='page-content'>
           <Outlet />
         </div>
-        <Footer />
       </>
   )
 }
@@ -47,6 +48,42 @@ const router = createBrowserRouter([
   }
 ])
 
+const AuthContextProvider = ({children}) => {
+  const [accessToken, setAccessToken] = useState([])
+  //const [username, setUsername] = useState("")
+  //const [userID, setUserID] = useState(0)
+
+  useEffect(() => {
+    //check our local storage for these items on page load
+    const checkAccess = localStorage.getItem("access")
+    //const checkUsername = localStorage.getItem("username")
+    //const checkID = Number(localStorage.getItem("userID"))
+
+    if (checkAccess) { //valid, not undefined
+      setAccessToken(checkAccess)
+      //setUsername(checkUsername)
+      //setUserID(checkID)
+    }
+  }, [])
+
+  const auth = {
+    accessToken: accessToken,
+    setAccessToken: setAccessToken,
+    //username: username,
+    //setUsername: setUsername,
+    //userID: userID,
+    //setUserID: setUserID,
+  }
+
+  return (
+    <AuthContext.Provider value={{ auth: auth }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <RouterProvider router={router} />
+  <AuthContextProvider>
+    <RouterProvider router={router} />
+  </AuthContextProvider>
 )
