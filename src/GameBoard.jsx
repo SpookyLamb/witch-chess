@@ -1,12 +1,28 @@
+import { useRef, useState } from "react"
+import { useEffect } from "react"
+
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
-import { useState } from "react"
+
 import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin } from "./ChessLogic"
+import { createClient } from "./websocket"
+import { client } from "websocket"
 
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
+const clientRef = createClient('test')
+
+function sendGameState(clientRef, boardState) {
+    let client = clientRef//.current //weird useRef bullshit
+
+    client.send(
+        JSON.stringify({
+            'message': boardState,
+        })
+    )
+}
 
 function Square(props) {
     //game square, an 8x8 grid of 64 of these makes up the whole game board
@@ -52,9 +68,19 @@ function Board() {
 
     const [whiteCaptures, setWhiteCaptures] = useState([]) //black pieces captured by white
     const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
-
     const [turn, setTurn] = useState("White")
 
+    useEffect( () => {
+        clientRef.onmessage = (e) => {
+            if (typeof e.data === 'string') {
+                console.log("Received: ", e.data);
+                let object = JSON.parse(e.data)
+                setBoardState(object.message)
+            }
+        };
+    }, [])
+
+    //element lists for rendering
     let boardElements = []
     let cappedWhite = []
     let cappedBlack = []
@@ -132,6 +158,7 @@ function Board() {
                     
                     //check for special moves
                     let result = checkSpecialMoves(copyState, boardState) //returns a two element array with the new board state and any flanked pawns
+                    let newState = result[0]
                     let flank = result[1]
 
                     //handle flanked pieces from en passant
@@ -145,8 +172,8 @@ function Board() {
                         }
                     }
                     
-                    //set the new state
-                    setBoardState(result[0]) //forward the current and previous board states
+                    //set the new state, by sending it via our socket and getting it echoed back
+                    sendGameState(clientRef, newState)
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]
