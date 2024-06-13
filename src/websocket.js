@@ -12,7 +12,7 @@ if (wsBaseUrl === 'localhost:8080') {
 
 export function createClient(lobby_code) {
 
-    const client = new W3CWebSocket(`${socket}://${baseUrl}/ws/game/` + lobby_code + '/');
+    const client = new W3CWebSocket(`${socket}://${wsBaseUrl}/ws/game/` + lobby_code + '/');
 
     client.onerror = function() {
         console.log('Connection Error');
