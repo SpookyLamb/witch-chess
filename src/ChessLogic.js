@@ -372,6 +372,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     let white //note color
     if (color === "w") { white = true } else { white = false }
 
+    let castling = false
     //first check if the color of the endPosition piece matches the active piece, if it does, immediately reject (you can't capture your own pieces)
     if (endPiece) { //empty strings always eval to true with startsWith, so we need to filter those out
         if (endPiece.startsWith(color)) {
@@ -385,6 +386,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                         if (endPiece === "wR") { //valid piece
                             if (endCol === 0 || endCol === 7) { //valid rook position
                                 //continued in the switch statement...
+                                castling = true
                             } else { //invalid rook position
                                 return false
                             }
@@ -400,6 +402,7 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                         if (endPiece === "bR") { //valid piece
                             if (endCol === 0 || endCol === 7) { //valid rook position
                                 //continued in the switch statement...
+                                castling = true
                             } else { //invalid rook position
                                 return false
                             }
@@ -653,18 +656,21 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
         case "K":
             //the king can only move to unoccupied squares within one space, in any direction
             //EXCEPT... when castling, which is a special move only the king can do
-            let castling = false
 
             if (startCol + 1 === endCol || startCol - 1 === endCol || startCol === endCol) {
                 if (startRow + 1 === endRow || startRow - 1 === endRow || startRow === endRow) {
                     //continue...
                 } else {
                     //check for castling, anything other than a valid castle returns false from here
-                    castling = true
+                    if (!castling) {
+                        return false
+                    }
                 }
             } else {
                 //check for castling, anything other than a valid castle returns false from here
-                castling = true
+                if (!castling) {
+                    return false
+                }
             }
 
             if (castling) {
@@ -699,20 +705,26 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                         shift = -2
                     }
 
-                    let kingCopy1 = structuredClone(boardState) //starting space
-                    let kingSpace = findKing(white, kingCopy1);
-                    let check1 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
-                    
-                    kingCopy1[startRow][startCol] = "" 
-                    kingCopy1[endRow][startCol + (shift / 2)] = pieceCode //skipped space
-                    kingSpace = findKing(white, kingCopy1)
-                    let check2 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
+                    let check1, check2, check3
 
-                    let kingCopy2 = structuredClone(boardState) 
-                    kingCopy2[startRow][startCol] = ""
-                    kingCopy2[endRow][startCol + shift] = pieceCode //end space
-                    kingSpace = findKing(white, kingCopy2)
-                    let check3 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy2)
+                    if (startCol + shift >= 0 && startCol + shift <= 7) {
+                        let kingCopy1 = structuredClone(boardState) //starting space
+                        let kingSpace = findKing(white, kingCopy1);
+                        check1 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
+                        
+                        kingCopy1[startRow][startCol] = "" 
+                        kingCopy1[endRow][startCol + (shift / 2)] = pieceCode //skipped space
+                        kingSpace = findKing(white, kingCopy1)
+                        check2 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy1)
+
+                        let kingCopy2 = structuredClone(boardState) 
+                        kingCopy2[startRow][startCol] = ""
+                        kingCopy2[endRow][startCol + shift] = pieceCode //end space
+                        kingSpace = findKing(white, kingCopy2)
+                        check3 = validateCheck(white, kingSpace[0], kingSpace[1], kingCopy2)
+                    } else {
+                        validCastle = false
+                    }
 
                     if (check1 || check2 || check3) {
                         validCastle = false
