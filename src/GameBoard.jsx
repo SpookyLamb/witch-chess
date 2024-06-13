@@ -22,6 +22,7 @@ function sendGameState(clientRef, boardState, nextTurn) {
 
     client.send(
         JSON.stringify({
+            "dispatch": "gamestate",
             'message': boardState,
             'turn': nextTurn,
         })

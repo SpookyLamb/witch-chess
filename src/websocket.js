@@ -13,7 +13,8 @@ export function createClient(lobby_code) {
 
         function requestInit() {
             client.send(JSON.stringify({
-                "turn": "init",
+                "dispatch": "init",
+                "turn": "",
                 "message": "",
             }))
         }
