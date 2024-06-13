@@ -10,6 +10,15 @@ export function createClient(lobby_code) {
     
     client.onopen = function() {
         console.log('WebSocket Client Connected');
+
+        function requestInit() {
+            client.send(JSON.stringify({
+                "turn": "init",
+                "message": "",
+            }))
+        }
+
+        setTimeout(requestInit, 1000)
     
         // function sendNumber() {
         //     if (client.readyState === client.OPEN) {

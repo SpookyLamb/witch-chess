@@ -9,17 +9,21 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin } from "./ChessLogic"
 import { createClient } from "./websocket"
-import { client } from "websocket"
 
+//game websocket
+let clientRef
+
+//game state
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
-const clientRef = createClient('test')
+let clientColor //the color of this client's player, assigned via websocket instantiation
 
-function sendGameState(clientRef, boardState) {
+function sendGameState(clientRef, boardState, nextTurn) {
     let client = clientRef//.current //weird useRef bullshit
 
     client.send(
         JSON.stringify({
             'message': boardState,
+            'turn': nextTurn,
         })
     )
 }
@@ -51,7 +55,7 @@ function Square(props) {
     )
 }
 
-function Board() {
+function Board(props) {
     //game board consists of eight rows (numbered 1-8) and eight columns (lettered A-H)
     const [boardState, setBoardState] = useState({
         8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"], //these strings correspond to pieces, should be self-explanatory
@@ -70,12 +74,30 @@ function Board() {
     const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
     const [turn, setTurn] = useState("White")
 
+    const lobby = props.lobby
+
+    //websocket
     useEffect( () => {
+        clientRef = createClient(lobby)
+
         clientRef.onmessage = (e) => {
             if (typeof e.data === 'string') {
                 console.log("Received: ", e.data);
+
                 let object = JSON.parse(e.data)
-                setBoardState(object.message)
+
+                switch (object.dispatch) {
+                    case "initial": //color assignment
+                        clientColor = object.color
+                        break;
+                    case "gamestate": //recieves new gamestate from the other player
+                        setBoardState(object.message)
+                        setTurn(object.turn)
+                        break;
+                    default:
+                        console.error("Bad data returned by the websocket: ", e.data)
+                        return
+                }
             }
         };
     }, [])
@@ -86,6 +108,11 @@ function Board() {
     let cappedBlack = []
 
     function squareClicked(row, column) { //responds to a game square being clicked, designating that square as the "active" square, provided a piece is present
+
+        if (turn !== clientColor) {
+            return //player can only move on their own turn
+        }
+
         let piece = boardState[row][column]
 
         //console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
@@ -172,19 +199,18 @@ function Board() {
                         }
                     }
                     
+                    let newTurn 
+                    if (turn === "White") {
+                        newTurn = "Black"
+                    } else {
+                        newTurn = "White"
+                    }
+
                     //set the new state, by sending it via our socket and getting it echoed back
-                    sendGameState(clientRef, newState)
+                    sendGameState(clientRef, newState, newTurn)
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]
-
-                    //and flip whos turn it is
-                    if (turn === "White") {
-                        setTurn("Black")
-                    } else {
-                        setTurn("White")
-                    }
-
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
