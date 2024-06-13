@@ -1,8 +1,9 @@
 import { w3cwebsocket as W3CWebSocket } from "websocket"
+import { baseUrl } from "./api";
 
 export function createClient(lobby_code) {
 
-    const client = new W3CWebSocket('ws://127.0.0.1:8000/ws/game/' + lobby_code + '/');
+    const client = new W3CWebSocket(`ws://${baseUrl}/ws/game/` + lobby_code + '/');
 
     client.onerror = function() {
         console.log('Connection Error');
