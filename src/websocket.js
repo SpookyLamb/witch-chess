@@ -1,9 +1,10 @@
 import { w3cwebsocket as W3CWebSocket } from "websocket"
-import { baseUrl } from "./api";
 
+//const wsBaseUrl = "localhost:8080" //local dev
+const wsBaseUrl = "witch-chess-backend.fly.dev" //production
 let socket
 
-if (baseUrl === 'http://127.0.0.1:8000') {
+if (wsBaseUrl === 'http://127.0.0.1:8000') {
     socket = 'ws'
 } else {
     socket = 'wss'
