@@ -15,7 +15,18 @@ let clientRef
 
 //game state
 let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
-let clientColor //the color of this client's player, assigned via websocket instantiation
+
+//inversion table
+let invert = {
+    1: 8,
+    2: 7,
+    3: 6,
+    4: 5,
+    5: 4,
+    6: 3,
+    7: 2,
+    8: 1,
+}
 
 function sendGameState(clientRef, boardState, nextTurn) {
     let client = clientRef//.current //weird useRef bullshit
@@ -37,6 +48,7 @@ function Square(props) {
     const col = props.col
     const piece = props.piece
     const squareClicked = props.squareClicked
+    const clientColor = props.clientColor
 
     //these squares need to respond to click input and inform the board, which does the actual logical heavy lifting on if that clicks means anything
     let displayPiece
@@ -46,13 +58,32 @@ function Square(props) {
     } else {
         displayPiece = ""
     }
+
+    //determines visual placement in the grid based on the client's color
+    let visRow = row
+    let visCol = col
+
+    if (clientColor === "Black") {
+        //row is untouched
+        visCol = invert[col + 1] //math accounts for the 1-8/0-7 funkiness
+    } else { //renders white-side by default
+        //col is untouched
+        visRow = invert[row]
+    }
     
     return (
-        <Col className="game-square" onClick={() => {
-            squareClicked(row, col)
-        }}>
-            {displayPiece}
-        </Col>
+        <div className="game-square" 
+        style={{ 
+            gridColumnStart: visCol,
+            gridColumnEnd: visCol + 1,
+            gridRowStart: visRow,
+            gridRowEnd: visRow + 1,
+        }}
+        onClick={() => { squareClicked(row, col) }}>
+        
+        {displayPiece}
+        
+        </div>
     )
 }
 
@@ -73,7 +104,9 @@ function Board(props) {
 
     const [whiteCaptures, setWhiteCaptures] = useState([]) //black pieces captured by white
     const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
+
     const [turn, setTurn] = useState("White")
+    const [clientColor, setClientColor] = useState("Spectator")
 
     const lobby = props.lobby
 
@@ -89,7 +122,7 @@ function Board(props) {
 
                 switch (object.dispatch) {
                     case "initial": //color assignment
-                        clientColor = object.color
+                        setClientColor(object.color)
                         break;
                     case "gamestate": //recieves new gamestate from the other player
                         setBoardState(object.message)
@@ -132,7 +165,7 @@ function Board(props) {
                     }
                 }
                 activeSquare = [row, column] //set the active square
-                console.log("Active square set!")
+                console.log("Active square set!", activeSquare)
             } else { //square doesn't have a piece
                 return //do nothing, empty squares can't become active
             }
@@ -225,31 +258,21 @@ function Board(props) {
     function fillBoardElements(newBoardState) { //fills out the board visuals row by row
 
         //by default, draws as though the player is white
-        //TO FLIP DRAW DIRECTION (and thus which side is on the bottom on a player's screen), FLIP ORDER OF ITERATION, so increment i instead of decrementing i
-        //the OPPOSITE must be done with the other iterator (j) to properly mirror the board, as though it was physically turned
         //this only affects the visuals - gameplay and calculations are identical regardless
 
-        for (let i = 8; i >= 1; i--) { //row loop
-            let rowArray = newBoardState[i]
-            let rowElements = []
-
-            for (let j = 0; j < rowArray.length; j++) { //column loop
-                rowElements.push(
+        for (let i = 1; i <= 8; i++) { //row loop
+            for (let j = 7; j >= 0; j--) { //column loop
+                boardElements.push(
                     <Square
                         row={i}
                         col={j}
                         piece={newBoardState[i][j]}
                         squareClicked={squareClicked}
+                        clientColor={clientColor}
                         key={uuidv4()}
                     />
                 )
             }
-
-            boardElements.push(
-                <Row key={uuidv4()}>
-                    {rowElements}
-                </Row>
-            )
         }
 
         //fill our captures while we're at it
@@ -303,22 +326,39 @@ function Board(props) {
 
     fillBoardElements(boardState)
 
+    let turnDisplay
+    if (clientColor === "White") {
+        if (turn === "Black") {
+            turnDisplay = (<div>Waiting on opponent...</div>)
+        } else {
+            turnDisplay = (<div>Your turn.</div>)
+        }
+    } else if (clientColor === "Black") {
+        if (turn === "White") {
+            turnDisplay = (<div>Waiting on opponent...</div>)
+        } else {
+            turnDisplay = (<div>Your turn.</div>)
+        }
+    } else { //spectator
+        turnDisplay = (<div>{turn} to move.</div>)
+    }
+
     return (
         <Container>
             <Row>
                 <Col id="black-captures" className="text-end">
                     {cappedBlack}
                 </Col>
-                <Col>
-                    <Container className="game-board">
+                <Col className="game-board">
+                    <div className="chess-grid">
                         {boardElements}
-                        <div>{turn} to move.</div>
-                    </Container>
+                    </div>
                 </Col>
-                <Col id="white-captures">
+                <Col id="white-captures" className="">
                     {cappedWhite}
                 </Col>
             </Row>
+            <Row>{turnDisplay}</Row>
         </Container>
     )
 }

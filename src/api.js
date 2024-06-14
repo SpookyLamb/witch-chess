@@ -1,10 +1,12 @@
 import axios from 'axios'
 
-//export const baseUrl = 'http://127.0.0.1:8000' //local dev
-export const baseUrl = 'https://witch-chess-backend.fly.dev' //production
+//REMEMBER TO CLOSE ANY OPEN LOCAL TABS BEFORE CHANGING THE COMMENTS ON THESE, ELSE YOU'LL CREATE ZOMBIE CLIENTS
 
-//export const wsBaseUrl = "127.0.0.1:8000" //local dev
-export const wsBaseUrl = "witch-chess-backend.fly.dev" //production
+export const baseUrl = 'http://127.0.0.1:8000' //local dev
+//export const baseUrl = 'https://witch-chess-backend.fly.dev' //production
+
+export const wsBaseUrl = "127.0.0.1:8000" //local dev
+//export const wsBaseUrl = "witch-chess-backend.fly.dev" //production
 
 //helper functions
 
