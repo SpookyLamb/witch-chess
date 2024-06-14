@@ -414,7 +414,7 @@ function Board(props) {
                     {cappedWhite}
                 </Col>
             </Row>
-            <Row>{turnDisplay}</Row>
+            <Row><Col className="text-center">{turnDisplay}</Col></Row>
         </Container>
     )
 }

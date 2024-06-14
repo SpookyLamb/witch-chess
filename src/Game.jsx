@@ -13,7 +13,11 @@ function LobbyInput(props) {
     const setElement = props.setElement
 
     function submit() {
-        setElement(<Board lobby={lobbyCode} />)
+        if (lobbyCode) {
+            setElement(<Board lobby={lobbyCode} />)
+        } else {
+            alert("Please enter a name for your lobby!")
+        }
     }
 
     return (
