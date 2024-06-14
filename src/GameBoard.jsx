@@ -11,10 +11,10 @@ import { checkSpecialMoves, validateMove, validateWin } from "./ChessLogic"
 import { createClient } from "./websocket"
 
 //game websocket
-let clientRef
+let clientRef;
 
 //game state
-let activeSquare = [0,0] //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
+let activeSquare = [0,0]; //coordinates of the active square, 0 in row (NOT COLUMN) means no active square
 
 //inversion table
 let invert = {
@@ -26,7 +26,11 @@ let invert = {
     6: 3,
     7: 2,
     8: 1,
-}
+};
+
+//game state
+let canPlay = false; //only becomes true when both players are present, set by the socket
+
 
 function sendGameState(clientRef, boardState, nextTurn) {
     let client = clientRef//.current //weird useRef bullshit
@@ -67,7 +71,7 @@ function Square(props) {
         //row is untouched
         visCol = invert[col + 1] //math accounts for the 1-8/0-7 funkiness
     } else { //renders white-side by default
-        //col is untouched
+        visCol = col + 1
         visRow = invert[row]
     }
     
@@ -128,6 +132,17 @@ function Board(props) {
                         setBoardState(object.message)
                         setTurn(object.turn)
                         break;
+                    case "gamestart": //informs players that the game can start
+                        canPlay = object.message
+                        alert("Let the game begin!")
+                        break;
+                    case "disconnect": //tells the remaining players that a player has disconnected
+                        if (object.message !== "Spectate") { //we don't care when spectators leave
+                            if (object.message !== clientColor) {
+                                alert("Your opponent has left the game!")
+                            }
+                        }
+                        break;
                     default:
                         console.error("Bad data returned by the websocket: ", e.data)
                         return
@@ -142,6 +157,10 @@ function Board(props) {
     let cappedBlack = []
 
     function squareClicked(row, column) { //responds to a game square being clicked, designating that square as the "active" square, provided a piece is present
+
+        if (!canPlay) {
+            return //can't play until both players are present
+        }
 
         if (turn !== clientColor) {
             return //player can only move on their own turn

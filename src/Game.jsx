@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react"
 
+import Container from "react-bootstrap/Container"
+import Row from "react-bootstrap/Row"
+import Col from "react-bootstrap/Col"
+
 import Board from "./GameBoard"
 
 function LobbyInput(props) {
@@ -13,10 +17,12 @@ function LobbyInput(props) {
     }
 
     return (
-        <div>
-            <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/>
-            <button className="mybutton" onClick={() => submit()}>Enter Lobby</button>
-        </div>
+        <Container>
+            <Col className="text-center">
+                <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/>
+                <button className="mybutton" onClick={() => submit()}>Enter Lobby</button>
+            </Col>
+        </Container>
     )
 }
 

@@ -23,7 +23,7 @@ body {
   max-width: var(--game-board-max);
   height: var(--game-board-size);
   width: var(--game-board-size);
-  grid-template-columns: auto-fit; 
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; 
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; /* 8 x 8 grid */
 }
 
