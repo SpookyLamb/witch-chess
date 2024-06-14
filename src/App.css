@@ -1,7 +1,7 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
-  --game-board-size: 800px;
-  --game-board-max: 800px;
+  --game-board-size: 80vw; /* 800px */
+  --game-board-max: 80vh;
 }
 
 html {
@@ -19,6 +19,8 @@ body {
 
 .chess-grid {
   display: grid;
+  max-height: var(--game-board-max);
+  max-width: var(--game-board-max);
   height: var(--game-board-size);
   width: var(--game-board-size);
   grid-template-columns: auto-fit; 
