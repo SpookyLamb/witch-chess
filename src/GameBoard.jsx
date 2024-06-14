@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useEffect } from "react"
 
 import Container from "react-bootstrap/Container"
@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin, checkCaptures } from "./ChessLogic"
 import { createClient } from "./websocket"
-import { formatSeconds } from "./utility"
+import { formatSeconds, tick } from "./utility"
 
 //game websocket
 let clientRef;
@@ -41,8 +41,11 @@ let lastState = {
     1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
 }; //stores the game state most recently sent to the client, starts with the default
 
+let whiteTimer = 180; //stores the ACTUAL playtime left for white
+let blackTimer = 180; //likewise for black
+
 function sendGameState(clientRef, boardState, nextTurn) {
-    let client = clientRef//.current //weird useRef bullshit
+    let client = clientRef
 
     client.send(
         JSON.stringify({
@@ -121,7 +124,7 @@ function Board(props) {
     const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
 
     const [whiteTime, setWhiteTime] = useState(180) //remaining clock time, in seconds
-    const [blackTime, setBlackTime] = useState(180)
+    const [blackTime, setBlackTime] = useState(180) //these times are PURELY VISUAL and not the actual time being tracked, because React :/
 
     const [turn, setTurn] = useState("White")
     const [clientColor, setClientColor] = useState("Spectator")
@@ -145,7 +148,7 @@ function Board(props) {
                     case "gamestate": //recieves new gamestate from the other player
                         //check for captures
                         const cap = checkCaptures(object.message, lastState)
-                        console.log(cap)
+                        
                         if (cap) {
                             if (cap.startsWith("w")) { //white piece captured by black
                                 let captures = blackCaptures
@@ -166,6 +169,15 @@ function Board(props) {
                         break;
                     case "gamestart": //informs players that the game can start
                         setCanPlay(object.message)
+
+                        clientRef.send( //echo back to let the server know the message was recieved
+                            JSON.stringify({
+                                "dispatch": "echo-gamestart",
+                                'message': "",
+                                'turn': "",
+                            })
+                        )
+
                         alert("Let the game begin!")
                         break;
                     case "disconnect": //tells the remaining players that a player has disconnected
@@ -173,6 +185,15 @@ function Board(props) {
                             if (object.message !== clientColor) {
                                 alert("Your opponent has left the game!")
                             }
+                        }
+                        break;
+                    case "time": //informs the player about an update to one player's remaining time
+                        if (object.color === "White") {
+                            whiteTimer = object.new_time
+                            setWhiteTime(whiteTimer)
+                        } else if (object.color === "Black") {
+                            blackTimer = object.new_time
+                            setBlackTime(blackTimer)
                         }
                         break;
                     default:
@@ -381,6 +402,8 @@ function Board(props) {
                     1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
                 }
                 setTurn("White")
+                whiteTimer = 180
+                blackTimer = 180
             }
         }
     }
@@ -407,8 +430,7 @@ function Board(props) {
     } else {
         turnDisplay = "Waiting for another player to join..."
     }
-  
-    //timers
+
     let topTime
     let bottomTime
 

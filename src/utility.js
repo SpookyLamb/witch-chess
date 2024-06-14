@@ -11,3 +11,8 @@ export function formatSeconds(seconds) {
         return minutes.toString() + ":" + remainder.toString()
     }
 }
+
+export function tick(func) {
+    //takes a function and calls it after one second with setTimeout
+    setTimeout(() => {func()}, 1000)
+}
