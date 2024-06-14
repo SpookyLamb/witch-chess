@@ -7,7 +7,7 @@ import Col from "react-bootstrap/Col"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures } from "./ChessLogic"
 import { createClient } from "./websocket"
 
 //game websocket
@@ -30,7 +30,16 @@ let invert = {
 
 //game state
 let canPlay = false; //only becomes true when both players are present, set by the socket
-
+let lastState = {
+    8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"], //these strings correspond to pieces, should be self-explanatory
+    7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"], //empty string = no piece
+    6: ["", "", "", "", "", "", "", ""],
+    5: ["", "", "", "", "", "", "", ""],
+    4: ["", "", "", "", "", "", "", ""],
+    3: ["", "", "", "", "", "", "", ""],
+    2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+    1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
+}; //stores the game state most recently sent to the client, starts with the default
 
 function sendGameState(clientRef, boardState, nextTurn) {
     let client = clientRef//.current //weird useRef bullshit
@@ -129,8 +138,26 @@ function Board(props) {
                         setClientColor(object.color)
                         break;
                     case "gamestate": //recieves new gamestate from the other player
+                        //check for captures
+                        const cap = checkCaptures(object.message, lastState)
+                        console.log(cap)
+                        if (cap) {
+                            if (cap.startsWith("w")) { //white piece captured by black
+                                let captures = blackCaptures
+                                captures.push(cap)
+                                setBlackCaptures(captures)
+                            } else { //black piece captured by white
+                                let captures = whiteCaptures
+                                captures.push(cap)
+                                setWhiteCaptures(captures)
+                            }
+                        }
+
+                        //update state
+                        lastState = object.message
                         setBoardState(object.message)
                         setTurn(object.turn)
+                        
                         break;
                     case "gamestart": //informs players that the game can start
                         canPlay = object.message
@@ -338,6 +365,16 @@ function Board(props) {
                     3: ["", "", "", "", "", "", "", ""],
                     2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
                     1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"], })
+                lastState = {
+                    8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+                    7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
+                    6: ["", "", "", "", "", "", "", ""],
+                    5: ["", "", "", "", "", "", "", ""],
+                    4: ["", "", "", "", "", "", "", ""],
+                    3: ["", "", "", "", "", "", "", ""],
+                    2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+                    1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
+                }
                 setTurn("White")
             }
         }

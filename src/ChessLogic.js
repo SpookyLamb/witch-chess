@@ -144,6 +144,37 @@ function checkBlockers(startPosition, endPosition, boardState) {
     }
 }
 
+export function checkCaptures(boardState, prevState) {
+    //checks the board state and returns the piece (if any) that was captured in the previous move
+    let cap = ""
+
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            //looking for a piece that has been replaced by the *opposite* color, anything else isn't a capture
+            const curPiece = boardState[i][j]
+            const prevPiece = prevState[i][j]
+            let curColor = ""
+            let prevColor = ""
+
+            if (curPiece) {
+                curColor = curPiece.charAt(0)
+            }
+            if (prevPiece) {
+                prevColor = prevPiece.charAt(0)
+            }
+
+            if (curColor && prevColor) { //pieces in both spots
+                if (curColor !== prevColor) { //captured piece
+                    cap = prevPiece
+                    return cap
+                }
+            }
+        }
+    }
+
+    return cap
+}
+
 export function checkSpecialMoves(boardState, prevState) {
     //"boardState" is a mutable copy, "prevState" is read-only
 
