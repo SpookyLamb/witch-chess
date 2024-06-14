@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin, checkCaptures } from "./ChessLogic"
 import { createClient } from "./websocket"
+import { formatSeconds } from "./utility"
 
 //game websocket
 let clientRef;
@@ -29,7 +30,6 @@ let invert = {
 };
 
 //game state
-let canPlay = false; //only becomes true when both players are present, set by the socket
 let lastState = {
     8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"], //these strings correspond to pieces, should be self-explanatory
     7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"], //empty string = no piece
@@ -115,8 +115,13 @@ function Board(props) {
         // A, B, C, D, E, F, G, H
     })
 
+    const [canPlay, setCanPlay] = useState(false) //only becomes true when both players are present, set by the socket
+
     const [whiteCaptures, setWhiteCaptures] = useState([]) //black pieces captured by white
     const [blackCaptures, setBlackCaptures] = useState([]) //white pieces captured by black
+
+    const [whiteTime, setWhiteTime] = useState(180) //remaining clock time, in seconds
+    const [blackTime, setBlackTime] = useState(180)
 
     const [turn, setTurn] = useState("White")
     const [clientColor, setClientColor] = useState("Spectator")
@@ -160,7 +165,7 @@ function Board(props) {
                         
                         break;
                     case "gamestart": //informs players that the game can start
-                        canPlay = object.message
+                        setCanPlay(object.message)
                         alert("Let the game begin!")
                         break;
                     case "disconnect": //tells the remaining players that a player has disconnected
@@ -383,24 +388,43 @@ function Board(props) {
     fillBoardElements(boardState)
 
     let turnDisplay
-    if (clientColor === "White") {
-        if (turn === "Black") {
-            turnDisplay = (<div>Waiting on opponent...</div>)
-        } else {
-            turnDisplay = (<div>Your turn.</div>)
+    if (canPlay) {
+        if (clientColor === "White") {
+            if (turn === "Black") {
+                turnDisplay = (<div>Waiting on opponent...</div>)
+            } else {
+                turnDisplay = (<div>Your turn.</div>)
+            }
+        } else if (clientColor === "Black") {
+            if (turn === "White") {
+                turnDisplay = (<div>Waiting on opponent...</div>)
+            } else {
+                turnDisplay = (<div>Your turn.</div>)
+            }
+        } else { //spectator
+            turnDisplay = (<div>{turn} to move.</div>)
         }
-    } else if (clientColor === "Black") {
-        if (turn === "White") {
-            turnDisplay = (<div>Waiting on opponent...</div>)
-        } else {
-            turnDisplay = (<div>Your turn.</div>)
-        }
-    } else { //spectator
-        turnDisplay = (<div>{turn} to move.</div>)
+    } else {
+        turnDisplay = "Waiting for another player to join..."
+    }
+  
+    //timers
+    let topTime
+    let bottomTime
+
+    if (clientColor === "Black") {
+        topTime = formatSeconds(whiteTime)
+        bottomTime = formatSeconds(blackTime)
+    } else {
+        topTime = formatSeconds(blackTime)
+        bottomTime = formatSeconds(whiteTime)
     }
 
     return (
         <Container>
+            <Row>
+                {topTime}
+            </Row>
             <Row>
                 <Col id="black-captures" className="text-end">
                     {cappedBlack}
@@ -415,6 +439,9 @@ function Board(props) {
                 </Col>
             </Row>
             <Row><Col className="text-center">{turnDisplay}</Col></Row>
+            <Row>
+                {bottomTime}
+            </Row>
         </Container>
     )
 }
