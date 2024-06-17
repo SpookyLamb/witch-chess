@@ -1,14 +1,20 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
-  --game-board-size: 80vw; /* 800px */
-  --game-board-max: 80vh;
+  --game-board-size: 75.5vw; /* 800px */
+  --game-board-max: 75.5vh;
+  --board-background-size: 90vw;
+  --board-background-max: 90vh;
 }
 
 html {
   height: 100%;
+  background: rgb(107,1,56);
+  background: linear-gradient(90deg, rgba(107,1,56,1) 0%, rgba(73,35,70,1) 50%, rgba(17,24,66,1) 100%);
 }
 body {
   height: 100%;
+  background: rgb(107,1,56);
+  background: linear-gradient(90deg, rgba(107,1,56,1) 0%, rgba(73,35,70,1) 50%, rgba(17,24,66,1) 100%);
 }
 #root {
   height: 100%;
@@ -17,7 +23,22 @@ body {
   flex-grow: 2;
 } */
 
+.chess-board-background {
+  display: flex;
+  align-items: center;
+
+  max-height: var(--board-background-max);
+  max-width: var(--board-background-max);
+  height: var(--board-background-size);
+  width: var(--board-background-size);
+
+  background-image: url("src/assets/chess-board.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .chess-grid {
+  margin: auto;
   display: grid;
   max-height: var(--game-board-max);
   max-width: var(--game-board-max);
@@ -32,3 +53,10 @@ body {
   border-width: 1px;
 }
 
+.white-square {
+  background-color: rgba(33, 47, 131, 0.7);
+}
+
+.black-square {
+  background-color: rgba(153, 1, 77, 0.7);
+}

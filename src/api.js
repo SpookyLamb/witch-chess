@@ -2,6 +2,8 @@ import axios from 'axios'
 
 //REMEMBER TO CLOSE ANY OPEN LOCAL TABS BEFORE CHANGING THE COMMENTS ON THESE, ELSE YOU'LL CREATE ZOMBIE CLIENTS
 
+export const debug = true //change to FALSE for production!
+
 export const baseUrl = 'http://127.0.0.1:8000' //local dev
 //export const baseUrl = 'https://witch-chess-backend.fly.dev' //production
 

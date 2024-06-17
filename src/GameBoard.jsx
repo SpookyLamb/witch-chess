@@ -4,12 +4,41 @@ import { useEffect } from "react"
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
+import Image from "react-bootstrap/Image"
 
 import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin, checkCaptures } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
+
+import { debug } from "./api"
+
+let imgUrl = "assets"
+
+if (debug) {
+    imgUrl = "src/assets"
+}
+
+//pictures
+const imageSources = {
+    gameBoard: `${imgUrl}/chess-board.png`,
+    hourglass: `${imgUrl}/hourglass.png`,
+    
+    blackKing: `${imgUrl}/black-king.png`,
+    blackQueen: `${imgUrl}/black-queen.png`,
+    blackPawn: `${imgUrl}/black-pawn.png`,
+    blackRook: `${imgUrl}/black-rook.png`,
+    blackKnight: `${imgUrl}/black-knight.png`,
+    blackBishop: `${imgUrl}/black-bishop.png`,
+
+    whiteKing: `${imgUrl}/white-king.png`,
+    whiteQueen: `${imgUrl}/white-queen.png`,
+    whitePawn: `${imgUrl}/white-pawn.png`,
+    whiteRook: `${imgUrl}/white-rook.png`,
+    whiteKnight: `${imgUrl}/white-knight.png`,
+    whiteBishop: `${imgUrl}/white-bishop.png`,
+}
 
 //game websocket
 let clientRef;
@@ -70,9 +99,67 @@ function Square(props) {
     let displayPiece
 
     if (piece) { //not empty string
-        displayPiece = piece
+        //displayPiece = piece
+        let imagePath
+        
+        switch (piece) {
+            case "wP":
+                imagePath = imageSources.whitePawn
+                break;
+            case "wPx":
+                imagePath = imageSources.whitePawn
+                break;
+            case "wN":
+                imagePath = imageSources.whiteKnight
+                break;
+            case "wB":
+                imagePath = imageSources.whiteBishop
+                break;
+            case "wR":
+                imagePath = imageSources.whiteRook
+                break;
+            case "wQ":
+                imagePath = imageSources.whiteQueen
+                break;
+            case "wK":
+                imagePath = imageSources.whiteKing
+                break;
+            
+            case "bP":
+                imagePath = imageSources.blackPawn
+                break;
+            case "bPx":
+                imagePath = imageSources.blackPawn
+                break;
+            case "bN":
+                imagePath = imageSources.blackKnight
+                break;
+            case "bB":
+                imagePath = imageSources.blackBishop
+                break;
+            case "bR":
+                imagePath = imageSources.blackRook
+                break;
+            case "bQ":
+                imagePath = imageSources.blackQueen
+                break;
+            case "bK":
+                imagePath = imageSources.blackKing
+                break;
+            default: //fail
+                imagePath = piece
+        }
+
+        displayPiece = (
+            <Image 
+                src={imagePath}
+                fluid
+            />
+        )
+
     } else {
-        displayPiece = ""
+        //displayPiece = ""
+        displayPiece = (<></>)
     }
 
     //determines visual placement in the grid based on the client's color
@@ -86,19 +173,34 @@ function Square(props) {
         visCol = col + 1
         visRow = invert[row]
     }
+
+    let colorClass
+    //finally, calculate whether or not this particular square should be a white or black square
+    if (row % 2 === 0) { //even row
+        if ((col + 1) % 2 === 0) { //even row, even col = black
+            colorClass = "black-square"
+        } else { //even row, odd col = white
+            colorClass = "white-square"
+        }
+    } else { //odd row
+        if ((col + 1) % 2 === 0) { //odd row, even col = white
+            colorClass = "white-square"
+        } else { //odd row, odd col = black
+            colorClass = "black-square"
+        }
+    }
     
     return (
-        <div className="game-square" 
-        style={{ 
-            gridColumnStart: visCol,
-            gridColumnEnd: visCol + 1,
-            gridRowStart: visRow,
-            gridRowEnd: visRow + 1,
-        }}
-        onClick={() => { squareClicked(row, col) }}>
-        
-        {displayPiece}
-        
+        <div className={"game-square" + " " + colorClass}
+            style={{ 
+                gridColumnStart: visCol,
+                gridColumnEnd: visCol + 1,
+                gridRowStart: visRow,
+                gridRowEnd: visRow + 1,
+            }}
+            onClick={() => { squareClicked(row, col) }}
+        >
+            {displayPiece}
         </div>
     )
 }
@@ -452,8 +554,10 @@ function Board(props) {
                     {cappedBlack}
                 </Col>
                 <Col className="game-board">
-                    <div className="chess-grid">
-                        {boardElements}
+                    <div className="chess-board-background">
+                        <div className="chess-grid">
+                            {boardElements}
+                        </div>
                     </div>
                 </Col>
                 <Col id="white-captures" className="">
