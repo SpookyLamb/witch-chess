@@ -60,3 +60,10 @@ body {
 .black-square {
   background-color: rgba(153, 1, 77, 0.7);
 }
+
+.capped-piece {
+  height: calc(var(--game-board-size) / 8);
+  max-height: calc(var(--game-board-max) / 8);
+  width: calc(var(--game-board-size) / 8);
+  max-width: calc(var(--game-board-max) / 8);
+}

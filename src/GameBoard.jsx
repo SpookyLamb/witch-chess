@@ -73,6 +73,35 @@ let lastState = {
 let whiteTimer = 180; //stores the ACTUAL playtime left for white
 let blackTimer = 180; //likewise for black
 
+function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime) {
+    //reset the board
+    setBoardState({
+        8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+        7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"], 
+        6: ["", "", "", "", "", "", "", ""],
+        5: ["", "", "", "", "", "", "", ""],
+        4: ["", "", "", "", "", "", "", ""],
+        3: ["", "", "", "", "", "", "", ""],
+        2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+        1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"], })
+    lastState = {
+        8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+        7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
+        6: ["", "", "", "", "", "", "", ""],
+        5: ["", "", "", "", "", "", "", ""],
+        4: ["", "", "", "", "", "", "", ""],
+        3: ["", "", "", "", "", "", "", ""],
+        2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+        1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
+    }
+    setTurn("White")
+    whiteTimer = 180
+    blackTimer = 180
+
+    setWhiteTime(whiteTimer)
+    setBlackTime(blackTimer)
+}
+
 function sendGameState(clientRef, boardState, nextTurn) {
     let client = clientRef
 
@@ -83,6 +112,60 @@ function sendGameState(clientRef, boardState, nextTurn) {
             'turn': nextTurn,
         })
     )
+}
+
+function getImagePath(piece) {
+    let imagePath
+        
+    switch (piece) {
+        case "wP":
+            imagePath = imageSources.whitePawn
+            break;
+        case "wPx":
+            imagePath = imageSources.whitePawn
+            break;
+        case "wN":
+            imagePath = imageSources.whiteKnight
+            break;
+        case "wB":
+            imagePath = imageSources.whiteBishop
+            break;
+        case "wR":
+            imagePath = imageSources.whiteRook
+            break;
+        case "wQ":
+            imagePath = imageSources.whiteQueen
+            break;
+        case "wK":
+            imagePath = imageSources.whiteKing
+            break;
+        
+        case "bP":
+            imagePath = imageSources.blackPawn
+            break;
+        case "bPx":
+            imagePath = imageSources.blackPawn
+            break;
+        case "bN":
+            imagePath = imageSources.blackKnight
+            break;
+        case "bB":
+            imagePath = imageSources.blackBishop
+            break;
+        case "bR":
+            imagePath = imageSources.blackRook
+            break;
+        case "bQ":
+            imagePath = imageSources.blackQueen
+            break;
+        case "bK":
+            imagePath = imageSources.blackKing
+            break;
+        default: //fail
+            imagePath = piece
+    }
+
+    return imagePath
 }
 
 function Square(props) {
@@ -100,55 +183,7 @@ function Square(props) {
 
     if (piece) { //not empty string
         //displayPiece = piece
-        let imagePath
-        
-        switch (piece) {
-            case "wP":
-                imagePath = imageSources.whitePawn
-                break;
-            case "wPx":
-                imagePath = imageSources.whitePawn
-                break;
-            case "wN":
-                imagePath = imageSources.whiteKnight
-                break;
-            case "wB":
-                imagePath = imageSources.whiteBishop
-                break;
-            case "wR":
-                imagePath = imageSources.whiteRook
-                break;
-            case "wQ":
-                imagePath = imageSources.whiteQueen
-                break;
-            case "wK":
-                imagePath = imageSources.whiteKing
-                break;
-            
-            case "bP":
-                imagePath = imageSources.blackPawn
-                break;
-            case "bPx":
-                imagePath = imageSources.blackPawn
-                break;
-            case "bN":
-                imagePath = imageSources.blackKnight
-                break;
-            case "bB":
-                imagePath = imageSources.blackBishop
-                break;
-            case "bR":
-                imagePath = imageSources.blackRook
-                break;
-            case "bQ":
-                imagePath = imageSources.blackQueen
-                break;
-            case "bK":
-                imagePath = imageSources.blackKing
-                break;
-            default: //fail
-                imagePath = piece
-        }
+        let imagePath = getImagePath(piece)
 
         displayPiece = (
             <Image 
@@ -296,6 +331,15 @@ function Board(props) {
                         } else if (object.color === "Black") {
                             blackTimer = object.new_time
                             setBlackTime(blackTimer)
+                        }
+                        break;
+                    case "timeout": //informs the players that a player has timed out, winning the game for the other player automatically
+                        if (object.color === "White") {
+                            alert("Time OUT for White! Black has won the game!")
+                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
+                        } else if (object.color === "Black") {
+                            alert("Time OUT for Black! White has won the game!")
+                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
                         }
                         break;
                     default:
@@ -451,18 +495,28 @@ function Board(props) {
 
         //fill our captures while we're at it
         for (const capturedPiece of whiteCaptures) {
+            let imagePath = getImagePath(capturedPiece)
+
             cappedWhite.push(
                 <div key={uuidv4()}>
-                    {capturedPiece}
+                    <img 
+                        className="capped-piece"
+                        src={imagePath}
+                    />
                     <br/>
                 </div>
             )
         }
 
         for (const capturedPiece of blackCaptures) {
+            let imagePath = getImagePath(capturedPiece)
+
             cappedBlack.push(
                 <div key={uuidv4()}>
-                    {capturedPiece}
+                    <img
+                        className="capped-piece"
+                        src={imagePath}
+                    />
                     <br/>
                 </div>
             )
@@ -484,28 +538,7 @@ function Board(props) {
                 alert(winner + " has won the game!")
 
                 //reset the board
-                setBoardState({
-                    8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-                    7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"], 
-                    6: ["", "", "", "", "", "", "", ""],
-                    5: ["", "", "", "", "", "", "", ""],
-                    4: ["", "", "", "", "", "", "", ""],
-                    3: ["", "", "", "", "", "", "", ""],
-                    2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
-                    1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"], })
-                lastState = {
-                    8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-                    7: ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
-                    6: ["", "", "", "", "", "", "", ""],
-                    5: ["", "", "", "", "", "", "", ""],
-                    4: ["", "", "", "", "", "", "", ""],
-                    3: ["", "", "", "", "", "", "", ""],
-                    2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
-                    1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
-                }
-                setTurn("White")
-                whiteTimer = 180
-                blackTimer = 180
+                resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
             }
         }
     }
