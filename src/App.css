@@ -4,6 +4,8 @@
   --game-board-max: 75.5vh;
   --board-background-size: 90vw;
   --board-background-max: 90vh;
+  --timer-size: 10vw;
+  --timer-max: 10vh;
 }
 
 html {
@@ -66,4 +68,25 @@ body {
   max-height: calc(var(--game-board-max) / 8);
   width: calc(var(--game-board-size) / 8);
   max-width: calc(var(--game-board-max) / 8);
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+
+  background-image: url("src/assets/hourglass.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  height: calc(var(--timer-size) * 1.2);
+  width: var(--timer-size);
+  max-height: calc(var(--timer-max)) * 1.2;
+  max-width: var(--timer-max);
+}
+
+.time-text {
+  font-size: larger;
+  margin: auto;
+  color: white;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }

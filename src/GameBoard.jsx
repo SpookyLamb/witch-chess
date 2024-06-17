@@ -73,7 +73,7 @@ let lastState = {
 let whiteTimer = 180; //stores the ACTUAL playtime left for white
 let blackTimer = 180; //likewise for black
 
-function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime) {
+function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures) {
     //reset the board
     setBoardState({
         8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -100,6 +100,9 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime) {
 
     setWhiteTime(whiteTimer)
     setBlackTime(blackTimer)
+
+    setWhiteCaptures([])
+    setBlackCaptures([])
 }
 
 function sendGameState(clientRef, boardState, nextTurn) {
@@ -336,10 +339,10 @@ function Board(props) {
                     case "timeout": //informs the players that a player has timed out, winning the game for the other player automatically
                         if (object.color === "White") {
                             alert("Time OUT for White! Black has won the game!")
-                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
+                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
                         } else if (object.color === "Black") {
                             alert("Time OUT for Black! White has won the game!")
-                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
+                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
                         }
                         break;
                     default:
@@ -538,7 +541,7 @@ function Board(props) {
                 alert(winner + " has won the game!")
 
                 //reset the board
-                resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime)
+                resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
             }
         }
     }
@@ -580,10 +583,16 @@ function Board(props) {
     return (
         <Container>
             <Row>
-                {topTime}
+                <Col>
+                </Col>
             </Row>
             <Row>
                 <Col id="black-captures" className="text-end">
+                    <div className="timer mx-auto">
+                        <div className="time-text">
+                            {formatSeconds(blackTime)}
+                        </div>
+                    </div>
                     {cappedBlack}
                 </Col>
                 <Col className="game-board">
@@ -594,12 +603,18 @@ function Board(props) {
                     </div>
                 </Col>
                 <Col id="white-captures" className="">
+                    <div className="timer mx-auto">
+                        <div className="time-text">
+                            {formatSeconds(whiteTime)}
+                        </div>
+                    </div>
                     {cappedWhite}
                 </Col>
             </Row>
-            <Row><Col className="text-center">{turnDisplay}</Col></Row>
+            <Row><Col className="text-center pb-2 text-white">{turnDisplay}</Col></Row>
             <Row>
-                {bottomTime}
+                <Col className="text-center">
+                </Col>
             </Row>
         </Container>
     )
