@@ -1091,7 +1091,7 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
     return false
 }
 
-function legalMoves(pieceCode, startPosition, boardState) {
+export function legalMoves(pieceCode, startPosition, boardState) {
     //takes a piece, position, and board, and returns an array of all legal moves (end positions) that it can perform
     let moves = []
 

@@ -8,7 +8,7 @@ import Image from "react-bootstrap/Image"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin, checkCaptures } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
@@ -203,6 +203,7 @@ function Square(props) {
     const piece = props.piece
     const squareClicked = props.squareClicked
     const clientColor = props.clientColor
+    const valid = props.valid
 
     //these squares need to respond to click input and inform the board, which does the actual logical heavy lifting on if that clicks means anything
     let displayPiece
@@ -236,8 +237,10 @@ function Square(props) {
     }
 
     let colorClass
-    //finally, calculate whether or not this particular square should be a white or black square
-    if (row % 2 === 0) { //even row
+    //finally, calculate whether or not this particular square should be a white or black square, or a "valid" square
+    if (valid) {
+        colorClass = "valid-square"
+    } else if (row % 2 === 0) { //even row
         if ((col + 1) % 2 === 0) { //even row, even col = black
             colorClass = "black-square"
         } else { //even row, odd col = white
@@ -291,6 +294,8 @@ function Board(props) {
 
     const [turn, setTurn] = useState("White")
     const [clientColor, setClientColor] = useState("Spectator")
+
+    const [validMoves, setValidMoves] = useState([])
 
     const lobby = props.lobby
 
@@ -410,6 +415,7 @@ function Board(props) {
         //console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
 
         if (activeSquare[0] === 0) { //no currently active square if row is 0
+
             //check the clicked square to see if it has a piece, via boardState
             if (piece) { //empty strings (aka, no piece) are false
                 //check to make sure the piece matches the player currently moving
@@ -423,14 +429,20 @@ function Board(props) {
                     }
                 }
                 activeSquare = [row, column] //set the active square
+                
+                setValidMoves(legalMoves(piece, [row, column], boardState)) //grab the legal moves
+
                 console.log("Active square set!", activeSquare)
+            
             } else { //square doesn't have a piece
+                setValidMoves([])
                 return //do nothing, empty squares can't become active
             }
         } else { //square already active, needs to check piece movement
             //if the square is identical to the current square, simply reset
             if (activeSquare[0] === row && activeSquare[1] === column) {
                 activeSquare = [0,0]
+                setValidMoves([])
                 console.log("Active square reset!")
             } else { //new square, check if it has a valid move
                 
@@ -444,6 +456,7 @@ function Board(props) {
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
                     console.log("Valid move!")
+                    setValidMoves([])
 
                     //handle captures
                     let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
@@ -506,6 +519,7 @@ function Board(props) {
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
+                    setValidMoves([])
                     return //ignore the move, as it is invalid
                 }
             }
@@ -518,12 +532,23 @@ function Board(props) {
         //by default, draws as though the player is white
         //this only affects the visuals - gameplay and calculations are identical regardless
 
+        //console.log(validMoves)
+
         for (let i = 1; i <= 8; i++) { //row loop
             for (let j = 7; j >= 0; j--) { //column loop
+
+                let valid = false
+                for (const move of validMoves) {
+                    if (i === move[0] && j === move[1]) {
+                        valid = true
+                    } 
+                }
+
                 boardElements.push(
                     <Square
                         row={i}
                         col={j}
+                        valid={valid}
                         piece={newBoardState[i][j]}
                         squareClicked={squareClicked}
                         clientColor={clientColor}

@@ -63,6 +63,10 @@ body {
   background-color: rgba(153, 1, 77, 0.7);
 }
 
+.valid-square {
+  background-color: rgba(17, 139, 17, 0.7);
+}
+
 .capped-piece {
   height: calc(var(--game-board-size) / 8);
   max-height: calc(var(--game-board-max) / 8);
