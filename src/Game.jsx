@@ -21,7 +21,7 @@ function LobbyInput(props) {
     }
 
     return (
-        <Container>
+        <Container className="py-5">
             <Col className="text-center">
                 <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/>
                 <button className="mybutton" onClick={() => submit()}>Enter Lobby</button>
@@ -30,11 +30,77 @@ function LobbyInput(props) {
     )
 }
 
+function LobbyListEntry(props) {
+    const name = props.name
+    const playerCount = props.playerCount
+
+    return (
+        <Row>
+            <Col>{name}</Col>
+            <Col>PLAYERS: {playerCount}</Col>
+            <Col>JOIN BUTTON</Col>
+        </Row>
+    )
+}
+
+function LobbyList() {
+    //lists out the public lobbies
+    return (
+        <Container className="text-center py-5">
+            <Col className="col-12 col-md-6 mx-auto border">
+                
+                <Col className="col-12 py-2 border">PUBLIC LOBBIES</Col>
+                <Col className="col-12 py-2 border">
+                    <LobbyListEntry name="NAME" playerCount={1} />
+                    <LobbyListEntry name="NAME" playerCount={1} />
+                    <LobbyListEntry name="NAME" playerCount={1} />
+                </Col>
+            </Col>
+        </Container>
+    )
+}
+
+function Lobby(props) {
+    const setElement = props.setElement
+
+    return (
+        <div>
+            <Title/>
+            <LobbyInput setElement={setElement}/>
+            <LobbyList/>
+        </div>
+    )
+}
+
+function Title() {
+    return (
+        <h1 className="text-white text-center">
+            WITCH CHESS
+        </h1>
+    )
+}
+
+function RulesButton() {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
+function Rules() {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
 function Game() {
     const [element, setElement] = useState()
 
     useEffect(() => {
-        setElement(<LobbyInput setElement={setElement}/>)
+        setElement(<Lobby setElement={setElement}/>)
     }, [])
 
     return (

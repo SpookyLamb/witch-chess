@@ -73,6 +73,27 @@ let lastState = {
 let whiteTimer = 180; //stores the ACTUAL playtime left for white
 let blackTimer = 180; //likewise for black
 
+let decision = false; //tells React not to declare a winner repeatedly
+
+function announceWin(winner) {
+    if (decision) {
+        return
+    } else {
+        decision = true
+    }
+
+    //sends the winner back to the server
+    let client = clientRef
+
+    client.send(
+        JSON.stringify({
+            "dispatch": "game-over",
+            'message': winner,
+            'turn': "",
+        })
+    )
+}
+
 function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures) {
     //reset the board
     setBoardState({
@@ -103,6 +124,8 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setWhiteCaptures([])
     setBlackCaptures([])
+
+    decision = false
 }
 
 function sendGameState(clientRef, boardState, nextTurn) {
@@ -338,12 +361,26 @@ function Board(props) {
                         break;
                     case "timeout": //informs the players that a player has timed out, winning the game for the other player automatically
                         if (object.color === "White") {
+                            announceWin("Black")
                             alert("Time OUT for White! Black has won the game!")
-                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
                         } else if (object.color === "Black") {
+                            announceWin("White")
                             alert("Time OUT for Black! White has won the game!")
-                            resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
                         }
+                        break;
+                    case "next-round":
+                        //reset and begin a new round
+                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
+                        alert("The true victor is still undecided. Another round!")
+
+                        clientRef.send( //echo back to let the server know the message was recieved
+                            JSON.stringify({
+                                "dispatch": "echo-nextround",
+                                'message': "",
+                                'turn': "",
+                            })
+                        )
+
                         break;
                     default:
                         console.error("Bad data returned by the websocket: ", e.data)
@@ -526,22 +563,23 @@ function Board(props) {
         }
 
         //while we're here (and we know state has updated), go ahead and check for a victory
-        let white
-        if (turn === "White") { 
-            white = true
-        } else {
-            white = false
-        }
-
-        let winner = validateWin(white, newBoardState)
-        if (winner) { //empty string means no winner
-            if (winner === "Draw") {
-                alert("Stalemate!")
+        if (!decision) {
+            let white
+            if (turn === "White") { 
+                white = true
             } else {
-                alert(winner + " has won the game!")
+                white = false
+            }
 
-                //reset the board
-                resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
+            let winner = validateWin(white, newBoardState)
+            if (winner) { //empty string means no winner
+                if (winner === "Draw") {
+                    announceWin("Draw")
+                    alert("Stalemate!")
+                } else {
+                    announceWin(winner)
+                    alert(winner + " has won the game!")
+                }
             }
         }
     }
