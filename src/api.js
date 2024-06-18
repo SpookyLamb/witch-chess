@@ -15,15 +15,12 @@ export const wsBaseUrl = "127.0.0.1:8000" //local dev
 export function saveLogin(authToken, authRefresh) {
     localStorage.setItem("access", authToken)
     localStorage.setItem("refresh", authRefresh)
-    //localStorage.setItem("username", username)
     console.log("Saved login information.")
 }
 
 export function deleteLogin() {
     localStorage.removeItem("access")
     localStorage.removeItem("refresh")
-    //localStorage.removeItem("username")
-    //localStorage.removeItem("userID")
     console.log("Deleted old login information.")
 }
 
@@ -80,3 +77,15 @@ export const fetchUser = ({ auth }) => {
     }).catch(error => console.log("ERROR: ", error))
 }
 
+export const fetchLobbies = ({ auth, setLobbies }) => {
+    axios({
+        method: 'get',
+        url: `${baseUrl}/lobbies/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+    }).then(response => {
+        console.log('FETCH LOBBIES RESPONSE: ', response)
+        setLobbies(response.data)
+    }).catch(error => console.log("ERROR: ", error))
+}

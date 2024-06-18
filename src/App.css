@@ -90,3 +90,33 @@ body {
   color: white;
   text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
+
+.lobby-input {
+  background-color: white;
+  color: #a915c7 !important;
+}
+
+.mybutton { 
+  background-color: #a915c7 !important;
+}
+
+.lobby-list {
+  background-color: white;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: 50vh;
+}
+
+
+/* MUI overrides */
+.Mui-focused {
+  color: #a915c7 !important;
+}
+
+.MuiInput-underline:after {
+  border-color: #a915c7 !important;
+}
+
+.MuiOutlinedInput-root {
+  border-color: #a915c7 !important;
+}
