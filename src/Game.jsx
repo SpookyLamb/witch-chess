@@ -18,6 +18,31 @@ import { fetchLobbies } from "./api"
 
 import { v4 as uuidv4 } from "uuid"
 
+import { debug } from "./api"
+
+let imgUrl = "assets"
+
+if (debug) {
+    imgUrl = "src/assets"
+}
+
+//pictures
+const imageSources = {    
+    blackKing: `${imgUrl}/black-king.png`,
+    blackQueen: `${imgUrl}/black-queen.png`,
+    blackPawn: `${imgUrl}/black-pawn.png`,
+    blackRook: `${imgUrl}/black-rook.png`,
+    blackKnight: `${imgUrl}/black-knight.png`,
+    blackBishop: `${imgUrl}/black-bishop.png`,
+
+    whiteKing: `${imgUrl}/white-king.png`,
+    whiteQueen: `${imgUrl}/white-queen.png`,
+    whitePawn: `${imgUrl}/white-pawn.png`,
+    whiteRook: `${imgUrl}/white-rook.png`,
+    whiteKnight: `${imgUrl}/white-knight.png`,
+    whiteBishop: `${imgUrl}/white-bishop.png`,
+}
+
 function LobbyInput(props) {
     const [lobbyCode, setLobbyCode] = useState("")
     const setElement = props.setElement
@@ -40,7 +65,7 @@ function LobbyInput(props) {
                 
                 {/* <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/> */}
                 
-                <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>Enter Lobby</Button>
+                <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>CREATE</Button>
             </Col>
         </Container>
     )
@@ -100,13 +125,17 @@ function LobbyList(props) {
 
             lobbyElements.push(<LobbyListEntry key={uuidv4()} name={value.lobby_code} playerCount={pCount} join={join}/>)
         }
-    }  
+    }
+
+    if (lobbyElements.length < 1) {
+        lobbyElements = "No open lobbies. :("
+    }
     
     return (
         <Container className="text-center py-5">
             <Col className="col-12 col-md-6 mx-auto border lobby-list">
                 
-                <h3 className="py-2">PUBLIC LOBBIES</h3>
+                <h3 className="py-2">Public Lobbies</h3>
                 {/* <Col className="col-12 py-2 border">PUBLIC LOBBIES</Col> */}
                 <Col className="col-12 py-2 border">
                     {/* <LobbyListEntry name="NAME" playerCount={1} />
@@ -121,11 +150,21 @@ function LobbyList(props) {
 
 function Lobby(props) {
     const setElement = props.setElement
+    const [rulesVisible, setRulesVisible] = useState(false)
+
+    let rules
+    if (rulesVisible) {
+        rules = <Rules setRulesVisible={setRulesVisible}/>
+    } else {
+        rules = <></>
+    }
 
     return (
         <div>
+            {rules}
             <Title/>
             <LobbyInput setElement={setElement}/>
+            <RulesButton setRulesVisible={setRulesVisible}/>
             <LobbyList setElement={setElement}/>
         </div>
     )
@@ -139,18 +178,71 @@ function Title() {
     )
 }
 
-function RulesButton() {
-    return (
-        <div>
+function RulesButton(props) {
+    const setRulesVisible = props.setRulesVisible
 
-        </div>
+    function showRules() {
+        setRulesVisible(true)
+    }
+
+    return (
+        <Container className="">
+            <Col className="text-center">
+                <Button variant="contained" size="large" className="mybutton" onClick={() => showRules()}>
+                    RULES
+                </Button>
+            </Col>
+        </Container>
     )
 }
 
-function Rules() {
-    return (
-        <div>
+function Rules(props) {
+    const setRulesVisible = props.setRulesVisible
 
+    function noRules() {
+        setRulesVisible(false)
+    }
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <Container>
+                    <Row>
+                        <Col>
+                        <h3>Witch Chess Rules</h3>
+                        <p>Anyone totally unfamiliar with the basic rules of Chess should refer to 
+                            <a href="https://en.wikipedia.org/wiki/Rules_of_chess" target="_blank"> this Wikipedia article</a> for the full rules.
+                        </p>
+                        <p>
+                            In brief: Chess is a turn-based strategy game where your goal is to capture the enemy's King. In Witch Chess, the pieces are the following:
+                        </p>
+                        <ul>
+                        <li>Pawns <img className="rules-piece" src={imageSources.whitePawn}/> <img className="rules-piece" src={imageSources.blackPawn}/></li>
+                        <li>Knights <img className="rules-piece" src={imageSources.whiteKnight}/> <img className="rules-piece" src={imageSources.blackKnight}/></li>
+                        <li>Bishops <img className="rules-piece" src={imageSources.whiteBishop}/> <img className="rules-piece" src={imageSources.blackBishop}/></li>
+                        <li>Rooks <img className="rules-piece" src={imageSources.whiteRook}/> <img className="rules-piece" src={imageSources.blackRook}/></li>
+                        <li>Queens <img className="rules-piece" src={imageSources.whiteQueen}/> <img className="rules-piece" src={imageSources.blackQueen}/></li>
+                        <li>Kings <img className="rules-piece" src={imageSources.whiteKing}/> <img className="rules-piece" src={imageSources.blackKing}/></li>
+                        </ul>
+                        <p>
+                            <strong>Witches are impatient!</strong> You only have three minutes for each game (gaining two seconds when you make a move), 
+                            and running out of time is an instant loss! It's better to make a bad move quickly than spend too much time trying to 
+                            come up with the perfect move!
+                        </p>
+                        <p>
+                            <strong>Witches are competitive!</strong> One game isn't enough for them to crown a victor. The first witch to win three games 
+                            (or the one with the most wins in five games) is considered the true winner. 
+                        </p>
+
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="pt-2 text-center">
+                            <Button variant="contained" size="large" className="mybutton" onClick={() => noRules()}>BACK</Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </div>
         </div>
     )
 }
