@@ -4,11 +4,8 @@ import axios from 'axios'
 
 export const debug = true //change to FALSE for production!
 
-export const baseUrl = 'http://127.0.0.1:8000' //local dev
-//export const baseUrl = 'https://witch-chess-backend.fly.dev' //production
-
-export const wsBaseUrl = "127.0.0.1:8000" //local dev
-//export const wsBaseUrl = "witch-chess-backend.fly.dev" //production
+export const baseUrl = import.meta.env.VITE_BASEURL
+export const wsBaseUrl = import.meta.env.VITE_WSBASEURL
 
 //helper functions
 
