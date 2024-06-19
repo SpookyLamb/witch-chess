@@ -763,7 +763,7 @@ function Board(props) {
                         </div>
                         {cappedBlack}
                     </Col>
-                    <Col className="game-board">
+                    <Col className="game-board d-flex justify-content-center align-items-center">
                         <div className="chess-board-background">
                             <div className="chess-grid">
                                 {boardElements}

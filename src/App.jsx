@@ -38,7 +38,7 @@ function App() {
   }, [auth.accessToken])
 
   return (
-      <div className="p-4">
+      <div className="py-4">
         {pageData}
       </div>
   )
