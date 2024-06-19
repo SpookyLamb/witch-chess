@@ -157,7 +157,7 @@ function Login() {
 
     return (
         <Container className="p-5 text-center text-white">
-            <h1 className="text-center p-3 pt-1">Witch Chess</h1>
+            <h1 className="text-center p-3 pt-1">WITCH CHESS</h1>
             {/* <hr className="pb-2" /> */}
             <br/>
             {display}

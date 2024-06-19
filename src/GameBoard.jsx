@@ -755,10 +755,6 @@ function Board(props) {
             {popUp}
             <Container>
                 <Row>
-                    <Col>
-                    </Col>
-                </Row>
-                <Row>
                     <Col id="black-captures" className="text-end">
                         <div className="timer mx-auto">
                             <div className="time-text">
@@ -783,11 +779,7 @@ function Board(props) {
                         {cappedWhite}
                     </Col>
                 </Row>
-                <Row><Col className="text-center pb-2 text-white">{turnDisplay}</Col></Row>
-                <Row>
-                    <Col className="text-center">
-                    </Col>
-                </Row>
+                <Row><Col className="text-center pb-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
         </div>
     )

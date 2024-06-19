@@ -72,10 +72,10 @@ function LobbyInput(props) {
                 
                 {/* <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/> */}
                 
-                <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>GO</Button>
+                <Button variant="contained" size="large" className="mybutton ms-1" onClick={() => submit()}>GO</Button>
             </Col>
             <Col className="pt-2 text-center text-white d-flex justify-content-center">
-                <label htmlFor="privacy">Private?:&nbsp;&nbsp;</label>
+                <label className="poppins-regular" htmlFor="privacy">Private?:&nbsp;&nbsp;</label>
                 <input
                     type="checkbox"
                     id="privacy"
@@ -155,14 +155,16 @@ function LobbyList(props) {
     return (
         <Container className="text-center py-5">
             <Col className="col-12 col-md-6 mx-auto border lobby-list">
-                <Col className="fs-3 pt-2">
+                <Col className="pt-2">
+                    <h3>
                         Public Lobbies
+                    </h3>
                 </Col>
                 <Col>
                     <RefreshButton setLobbies={setLobbies} />
                 </Col>
 
-                <Col className="col-12 py-2 border">
+                <Col className="col-12 py-2 border poppins-regular">
                     {lobbyElements}
                 </Col>
             </Col>
@@ -254,12 +256,12 @@ function Rules(props) {
                             In brief: Chess is a turn-based strategy game where your goal is to capture the enemy's King. In Witch Chess, the pieces are the following:
                         </p>
                         <ul>
-                        <li>Pawns <img className="rules-piece" src={imageSources.whitePawn}/> <img className="rules-piece" src={imageSources.blackPawn}/></li>
+                        <li>Pawns&nbsp;&nbsp; <img className="rules-piece" src={imageSources.whitePawn}/> <img className="rules-piece" src={imageSources.blackPawn}/></li>
                         <li>Knights <img className="rules-piece" src={imageSources.whiteKnight}/> <img className="rules-piece" src={imageSources.blackKnight}/></li>
                         <li>Bishops <img className="rules-piece" src={imageSources.whiteBishop}/> <img className="rules-piece" src={imageSources.blackBishop}/></li>
-                        <li>Rooks <img className="rules-piece" src={imageSources.whiteRook}/> <img className="rules-piece" src={imageSources.blackRook}/></li>
-                        <li>Queens <img className="rules-piece" src={imageSources.whiteQueen}/> <img className="rules-piece" src={imageSources.blackQueen}/></li>
-                        <li>Kings <img className="rules-piece" src={imageSources.whiteKing}/> <img className="rules-piece" src={imageSources.blackKing}/></li>
+                        <li>Rooks&nbsp;&nbsp; <img className="rules-piece" src={imageSources.whiteRook}/> <img className="rules-piece" src={imageSources.blackRook}/></li>
+                        <li>Queens&nbsp; <img className="rules-piece" src={imageSources.whiteQueen}/> <img className="rules-piece" src={imageSources.blackQueen}/></li>
+                        <li>Kings&nbsp;&nbsp; <img className="rules-piece" src={imageSources.whiteKing}/> <img className="rules-piece" src={imageSources.blackKing}/></li>
                         </ul>
                         <p>
                             <strong>Witches are impatient!</strong> You only have three minutes for each game (gaining two seconds when you make a move), 
