@@ -144,9 +144,6 @@ function LobbyList(props) {
                 </Col>
 
                 <Col className="col-12 py-2 border">
-                    {/* <LobbyListEntry name="NAME" playerCount={1} />
-                    <LobbyListEntry name="NAME" playerCount={1} />
-                    <LobbyListEntry name="NAME" playerCount={1} /> */}
                     {lobbyElements}
                 </Col>
             </Col>

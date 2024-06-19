@@ -6,6 +6,8 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import Image from "react-bootstrap/Image"
 
+import { Button } from "@mui/material"
+
 import { v4 as uuidv4 } from 'uuid'
 
 import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves } from "./ChessLogic"
@@ -74,6 +76,7 @@ let whiteTimer = 180; //stores the ACTUAL playtime left for white
 let blackTimer = 180; //likewise for black
 
 let decision = false; //tells React not to declare a winner repeatedly
+let popSentinel = false; //makes React behave with the pop ups and actually queue them up >:(
 
 function announceWin(winner) {
     if (decision) {
@@ -194,6 +197,35 @@ function getImagePath(piece) {
     return imagePath
 }
 
+function PopUp(props) {
+    const text = props.text
+    const setPopVisible = props.setPopVisible
+
+    function killPopup() {
+        popSentinel = false
+        setPopVisible(false)
+    }
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <Container>
+                    <Row>
+                        <Col className="text-center">
+                            <p>{text}</p>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="text-center">
+                        <Button variant="contained" size="large" className="mybutton" onClick={() => killPopup()}>OK</Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </div>
+        </div>
+    )
+}
+
 function Square(props) {
     //game square, an 8x8 grid of 64 of these makes up the whole game board
     //each square has a given row (numbered 1-8) and column (lettered A-H)
@@ -297,6 +329,11 @@ function Board(props) {
 
     const [validMoves, setValidMoves] = useState([])
 
+    //pop ups
+    const [popVisible, setPopVisible] = useState(false)
+    const [popText, setPopText] = useState("")
+    const [queuedPopText, setQueuedPopText] = useState("")
+
     const lobby = props.lobby
 
     //websocket
@@ -346,12 +383,12 @@ function Board(props) {
                             })
                         )
 
-                        alert("Let the game begin!")
+                        doPopUp("Let the game begin!")
                         break;
                     case "disconnect": //tells the remaining players that a player has disconnected
                         if (object.message !== "Spectate") { //we don't care when spectators leave
                             if (object.message !== clientColor) {
-                                alert("Your opponent has left the game!")
+                                doPopUp("Your opponent has left the game!")
                             }
                         }
                         break;
@@ -367,16 +404,16 @@ function Board(props) {
                     case "timeout": //informs the players that a player has timed out, winning the game for the other player automatically
                         if (object.color === "White") {
                             announceWin("Black")
-                            alert("Time OUT for White! Black has won the game!")
+                            doPopUp("Time OUT for White! Black has won the game!")
                         } else if (object.color === "Black") {
                             announceWin("White")
-                            alert("Time OUT for Black! White has won the game!")
+                            doPopUp("Time OUT for Black! White has won the game!")
                         }
                         break;
                     case "next-round":
                         //reset and begin a new round
                         resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
-                        alert("The true victor is still undecided. Another round!")
+                        doPopUp("The true victor is still undecided. Another round!")
 
                         clientRef.send( //echo back to let the server know the message was recieved
                             JSON.stringify({
@@ -394,6 +431,27 @@ function Board(props) {
             }
         };
     }, [])
+
+    function doPopUp(text) {
+        //queue
+        if (popSentinel) { //don't override existing pop up, wait until it dies
+            setQueuedPopText(text)
+        } else {
+            setPopText(text)
+            popSentinel = true
+            setPopVisible(true)
+        }
+    }
+
+    let popUp
+    if (popVisible) {
+        popUp = (<PopUp text={popText} setPopVisible={setPopVisible}/>)
+    } else if (queuedPopText) {
+        doPopUp(queuedPopText)
+        setQueuedPopText("")
+    } else {
+        popUp = (<></>)
+    }
 
     //element lists for rendering
     let boardElements = []
@@ -600,10 +658,10 @@ function Board(props) {
             if (winner) { //empty string means no winner
                 if (winner === "Draw") {
                     announceWin("Draw")
-                    alert("Stalemate!")
+                    doPopUp("Stalemate!")
                 } else {
                     announceWin(winner)
-                    alert(winner + " has won the game!")
+                    doPopUp(winner + " has won the game!")
                 }
             }
         }
@@ -644,42 +702,45 @@ function Board(props) {
     }
 
     return (
-        <Container>
-            <Row>
-                <Col>
-                </Col>
-            </Row>
-            <Row>
-                <Col id="black-captures" className="text-end">
-                    <div className="timer mx-auto">
-                        <div className="time-text">
-                            {formatSeconds(blackTime)}
+        <div>
+            {popUp}
+            <Container>
+                <Row>
+                    <Col>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col id="black-captures" className="text-end">
+                        <div className="timer mx-auto">
+                            <div className="time-text">
+                                {formatSeconds(blackTime)}
+                            </div>
                         </div>
-                    </div>
-                    {cappedBlack}
-                </Col>
-                <Col className="game-board">
-                    <div className="chess-board-background">
-                        <div className="chess-grid">
-                            {boardElements}
+                        {cappedBlack}
+                    </Col>
+                    <Col className="game-board">
+                        <div className="chess-board-background">
+                            <div className="chess-grid">
+                                {boardElements}
+                            </div>
                         </div>
-                    </div>
-                </Col>
-                <Col id="white-captures" className="">
-                    <div className="timer mx-auto">
-                        <div className="time-text">
-                            {formatSeconds(whiteTime)}
+                    </Col>
+                    <Col id="white-captures" className="">
+                        <div className="timer mx-auto">
+                            <div className="time-text">
+                                {formatSeconds(whiteTime)}
+                            </div>
                         </div>
-                    </div>
-                    {cappedWhite}
-                </Col>
-            </Row>
-            <Row><Col className="text-center pb-2 text-white">{turnDisplay}</Col></Row>
-            <Row>
-                <Col className="text-center">
-                </Col>
-            </Row>
-        </Container>
+                        {cappedWhite}
+                    </Col>
+                </Row>
+                <Row><Col className="text-center pb-2 text-white">{turnDisplay}</Col></Row>
+                <Row>
+                    <Col className="text-center">
+                    </Col>
+                </Row>
+            </Container>
+        </div>
     )
 }
 
