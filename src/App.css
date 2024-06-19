@@ -104,12 +104,20 @@ body {
   background-color: #a915c7 !important;
 }
 
+.mytextbutton {
+  color: #e14aff !important;
+}
+
 .lobby-list {
   background-color: white;
   overflow-y: scroll;
   overflow-x: hidden;
   max-height: 50vh;
   border-radius: 10px;
+}
+
+.default-bg-color {
+  background-color: rgb(222, 112, 255);
 }
 
 /* Modals */

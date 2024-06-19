@@ -51,7 +51,9 @@ function CreateUser() {
             <Col>
                 <TextField
                     label="Username"
-                    variant="standard"
+                    variant="filled"
+                    className="lobby-input rounded my-1"
+                    size="small"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
@@ -59,7 +61,9 @@ function CreateUser() {
             <Col>
                 <TextField
                     label="Password"
-                    variant="standard"
+                    variant="filled"
+                    className="lobby-input rounded my-1"
+                    size="small"
                     type='password'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -68,7 +72,9 @@ function CreateUser() {
             <Col>
                 <TextField
                     label="Confirm Password"
-                    variant="standard"
+                    variant="filled"
+                    className="lobby-input rounded my-1"
+                    size="small"
                     type='password'
                     value={passwordConf}
                     onChange={(e) => setPasswordConf(e.target.value)}
@@ -77,7 +83,9 @@ function CreateUser() {
             <Col>
                 <TextField
                     label="Email"
-                    variant="standard"
+                    variant="filled"
+                    className="lobby-input rounded my-1"
+                    size="small"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
@@ -106,8 +114,9 @@ function LoginField() {
             <Col className="p-1">
                 <TextField
                     label="Username"
-                    variant="standard"
-                    className="loggedin"
+                    variant="filled"
+                    className="lobby-input rounded"
+                    size="small"
                     id="userlogin"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -116,8 +125,9 @@ function LoginField() {
             <Col className="p-1">
                 <TextField
                     label="Password"
-                    variant="standard"
-                    className="loggedin"
+                    variant="filled"
+                    className="lobby-input rounded"
+                    size="small"
                     id="passwordlogin"
                     type='password'
                     value={password}
@@ -146,11 +156,12 @@ function Login() {
     }
 
     return (
-        <Container className="p-5 text-center border rounded foreground-box">
+        <Container className="p-5 text-center text-white">
             <h1 className="text-center p-3 pt-1">Witch Chess</h1>
-            <hr className="pb-2" />
+            {/* <hr className="pb-2" /> */}
+            <br/>
             {display}
-            <Button className="pt-3" variant="text" onClick={() => {
+            <Button className="pt-3 mytextbutton" variant="text" onClick={() => {
                 setRegistering(!registering)
             }}> {buttonText} </Button>
         </Container>

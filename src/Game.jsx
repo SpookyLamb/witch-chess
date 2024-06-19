@@ -67,7 +67,7 @@ function LobbyInput(props) {
             <h3 className="py-2 text-center text-white">Create/Join A Lobby</h3>
             <Col className="text-center text-white d-flex justify-content-center">
                 
-                <TextField label="Lobby Name" className="lobby-input me-1" size="small" 
+                <TextField label="Lobby Name" className="lobby-input rounded me-1" size="small" 
                 variant="filled" value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/>
                 
                 {/* <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/> */}
