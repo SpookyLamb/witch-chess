@@ -47,11 +47,16 @@ const imageSources = {
 
 function LobbyInput(props) {
     const [lobbyCode, setLobbyCode] = useState("")
+    const [lobbyPrivate, setLobbyPrivate] = useState(false)
     const setElement = props.setElement
+
+    const handleOnChange = () => {
+        setLobbyPrivate(!lobbyPrivate)
+    }
 
     function submit() {
         if (lobbyCode) {
-            setElement(<Board lobby={lobbyCode} />)
+            setElement(<Board lobby={lobbyCode} lobbyPrivate={lobbyPrivate}/>)
         } else {
             alert("Please enter a name for your lobby!")
         }
@@ -68,6 +73,16 @@ function LobbyInput(props) {
                 {/* <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/> */}
                 
                 <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>GO</Button>
+            </Col>
+            <Col className="pt-2 text-center text-white d-flex justify-content-center">
+                <label htmlFor="privacy">Private?:&nbsp;&nbsp;</label>
+                <input
+                    type="checkbox"
+                    id="privacy"
+                    name="privacy"
+                    checked={lobbyPrivate}
+                    onChange={handleOnChange}
+                />
             </Col>
         </Container>
     )
@@ -117,6 +132,10 @@ function LobbyList(props) {
     let lobbyElements = []
     for (const [key, value] of Object.entries(lobbies)) {
         if (value.black || value.white) { //at least one player present
+            if (value.private) {
+                continue //private lobbies are ignored and not displayed
+            }
+
             let pCount = 0
             if (value.black) {
                 pCount += 1

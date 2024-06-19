@@ -9,7 +9,7 @@ if (wsBaseUrl === '127.0.0.1:8000') {
     socket = 'wss'
 }
 
-export function createClient(lobby_code) {
+export function createClient(lobby_code, lobbyPrivate) {
 
     const client = new W3CWebSocket(`${socket}://${wsBaseUrl}/ws/game/` + lobby_code + '/');
 
@@ -24,22 +24,11 @@ export function createClient(lobby_code) {
             client.send(JSON.stringify({
                 "dispatch": "init",
                 "turn": "",
-                "message": "",
+                "message": lobbyPrivate,
             }))
         }
 
-        setTimeout(requestInit, 1000)
-    
-        // function sendNumber() {
-        //     if (client.readyState === client.OPEN) {
-        //         let number = Math.round(Math.random() * 0xFFFFFF);
-        //         client.send(JSON.stringify({
-        //             'message': dummy_id + number.toString(),
-        //         }));
-        //         //setTimeout(sendNumber, 10000);
-        //     }
-        // }
-        // sendNumber();
+        setTimeout(requestInit, 100)
     };
     
     client.onclose = function() {

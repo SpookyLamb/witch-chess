@@ -48,20 +48,6 @@ export const getToken = ({ auth, username, password }) => {
     }).catch(error => console.log("ERROR: ", error))
 }
 
-// const getUserID = (accessToken, auth) => {
-//     axios({
-//         method: 'get',
-//         url: `${baseUrl}/user-id/`,
-//         headers: {
-//             Authorization: `Bearer ${accessToken}`
-//         },
-//     }).then(response => {
-//         console.log("GET USER RESPONSE: ", response)
-//         auth.setUserID(response.data.id)
-//         localStorage.setItem("userID", response.data.id)
-//     }).catch(error => console.log("ERROR: ", error))
-// }
-
 export const fetchUser = ({ auth }) => {
     axios({
         method: 'get',
@@ -82,7 +68,7 @@ export const fetchLobbies = ({ auth, setLobbies }) => {
             Authorization: `Bearer ${auth.accessToken}`
         },
     }).then(response => {
-        console.log('FETCH LOBBIES RESPONSE: ', response)
+        //console.log('FETCH LOBBIES RESPONSE: ', response)
         setLobbies(response.data)
     }).catch(error => console.log("ERROR: ", error))
 }

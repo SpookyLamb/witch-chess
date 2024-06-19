@@ -335,10 +335,11 @@ function Board(props) {
     const [queuedPopText, setQueuedPopText] = useState("")
 
     const lobby = props.lobby
+    const lobbyPrivate = props.lobbyPrivate
 
     //websocket
     useEffect( () => {
-        clientRef = createClient(lobby)
+        clientRef = createClient(lobby, lobbyPrivate)
 
         clientRef.onmessage = (e) => {
             if (typeof e.data === 'string') {
