@@ -77,6 +77,7 @@ let blackTimer = 180; //likewise for black
 
 let decision = false; //tells React not to declare a winner repeatedly
 let popSentinel = false; //makes React behave with the pop ups and actually queue them up >:(
+let colorTracker = "Spectate"; // >:(
 
 function announceWin(winner) {
     if (decision) {
@@ -198,12 +199,23 @@ function getImagePath(piece) {
 }
 
 function PopUp(props) {
-    const text = props.text
+    let text = props.text
     const setPopVisible = props.setPopVisible
 
     function killPopup() {
         popSentinel = false
         setPopVisible(false)
+    }
+
+    let header
+    if (text === "VICTORY") {
+        header = (<h2>VICTORY!</h2>)
+        text = "You won the set! Congratulations!"
+    } else if (text === "DEFEAT") {
+        header = (<h2>You've lost...</h2>)
+        text = "You didn't take enough rounds to win the set. Better luck next time!"
+    } else {
+        header = (<></>)
     }
 
     return (
@@ -212,6 +224,7 @@ function PopUp(props) {
                 <Container>
                     <Row>
                         <Col className="text-center">
+                            {header}
                             <p>{text}</p>
                         </Col>
                     </Row>
@@ -243,9 +256,35 @@ function Square(props) {
     if (piece) { //not empty string
         //displayPiece = piece
         let imagePath = getImagePath(piece)
+        let alt = ""
+
+        switch (piece.charAt(1)) {
+            case "P":
+                alt = "Pawn"
+                break;
+            case "N":
+                alt = "Knight"
+                break;
+            case "B":
+                alt = "Bishop"
+                break;
+            case "R":
+                alt = "Rook"
+                break;
+            case "Q":
+                alt = "Queen"
+                break;
+            case "K":
+                alt = "King"
+                break;
+            default:
+                alt = ""
+                break;
+        }
 
         displayPiece = (
             <Image 
+                alt={alt}
                 src={imagePath}
                 fluid
             />
@@ -350,6 +389,7 @@ function Board(props) {
                 switch (object.dispatch) {
                     case "initial": //color assignment
                         setClientColor(object.color)
+                        colorTracker = object.color
                         break;
                     case "gamestate": //recieves new gamestate from the other player
                         //check for captures
@@ -424,6 +464,14 @@ function Board(props) {
                             })
                         )
 
+                        break;
+                    case "victory":
+                        if (object.color === colorTracker) {
+                            doPopUp("VICTORY")
+                        } else { //also happens when a total draw occurs
+                            doPopUp("DEFEAT")
+                        }
+                        
                         break;
                     default:
                         console.error("Bad data returned by the websocket: ", e.data)

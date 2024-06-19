@@ -21,6 +21,13 @@ export function createClient(lobby_code, lobbyPrivate) {
         console.log('WebSocket Client Connected');
 
         function requestInit() {
+
+            if (lobbyPrivate) { //guards against bad data
+                lobbyPrivate = true
+            } else {
+                lobbyPrivate = false
+            }
+
             client.send(JSON.stringify({
                 "dispatch": "init",
                 "turn": "",
