@@ -8,8 +8,10 @@ import Col from "react-bootstrap/Col"
 
 import { TextField } from "@mui/material"
 import { Button } from "@mui/material"
+import { IconButton } from "@mui/material"
 
 import PersonIcon from '@mui/icons-material/Person';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import Board from "./GameBoard"
 
@@ -57,7 +59,7 @@ function LobbyInput(props) {
 
     return (
         <Container className="py-5">
-            <h3 className="py-2 text-center text-white">Create A Lobby</h3>
+            <h3 className="py-2 text-center text-white">Create/Join A Lobby</h3>
             <Col className="text-center text-white d-flex justify-content-center">
                 
                 <TextField label="Lobby Name" className="lobby-input me-1" size="small" 
@@ -65,7 +67,7 @@ function LobbyInput(props) {
                 
                 {/* <input value={lobbyCode} onChange={(e) => setLobbyCode(e.target.value)}/> */}
                 
-                <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>CREATE</Button>
+                <Button variant="contained" className="mybutton ms-1" onClick={() => submit()}>GO</Button>
             </Col>
         </Container>
     )
@@ -134,9 +136,13 @@ function LobbyList(props) {
     return (
         <Container className="text-center py-5">
             <Col className="col-12 col-md-6 mx-auto border lobby-list">
-                
-                <h3 className="py-2">Public Lobbies</h3>
-                {/* <Col className="col-12 py-2 border">PUBLIC LOBBIES</Col> */}
+                <Col className="fs-3 pt-2">
+                        Public Lobbies
+                </Col>
+                <Col>
+                    <RefreshButton setLobbies={setLobbies} />
+                </Col>
+
                 <Col className="col-12 py-2 border">
                     {/* <LobbyListEntry name="NAME" playerCount={1} />
                     <LobbyListEntry name="NAME" playerCount={1} />
@@ -145,6 +151,21 @@ function LobbyList(props) {
                 </Col>
             </Col>
         </Container>
+    )
+}
+
+function RefreshButton(props) {
+    const { auth } = useContext(AuthContext)
+    const setLobbies = props.setLobbies
+
+    function refreshLobbies() {
+        fetchLobbies({ auth, setLobbies })
+    }
+
+    return (
+        <IconButton className="myiconbutton" aria-label="refresh lobbies" onClick={() => refreshLobbies()}>
+            <RefreshIcon/>
+        </IconButton>
     )
 }
 
