@@ -1189,6 +1189,7 @@ function threatenedSquares(pieceCode, startPosition, boardState, white) {
     return threat
 }
 
+//used by telekinesis
 export function pawnPositions(white, boardState) {
     let pawns = []
 
@@ -1209,6 +1210,69 @@ export function pawnPositions(white, boardState) {
     }
 
     return pawns
+}
+
+//used by raise dead
+export function graveSpots(white, piece, boardState) {
+    //takes a color, piece, and board state and returns the valid positions a piece can be raised to
+    //skips any spaces that are occupied, can return nothing
+    let graves = []
+    const type = piece.charAt(1)
+
+    let row
+    if (type === "P") {
+        if (white) {
+            row = 2
+        } else {
+            row = 7
+        }
+    } else {
+        if (white) {
+            row = 1
+        } else {
+            row = 8
+        }
+    }
+
+    switch (type) {
+        case "P":
+            //the whole pawn starting row
+            for (let col = 0; col <= 7; col++) {
+                graves.push([row, col])
+            }
+            break;
+        case "B":
+            //columns 2 and 5
+            graves.push([row, 2])
+            graves.push([row, 5])
+            break;
+        case "N":
+            //columns 1 and 6
+            graves.push([row, 1])
+            graves.push([row, 6])
+            break;
+        case "R":
+            //columns 0 and 7
+            graves.push([row, 0])
+            graves.push([row, 7])
+            break;
+        case "Q":
+            //column 3
+            graves.push([row, 3])
+            break;
+        default: //we can skip the king since he should NEVER be captured
+            return []
+    }
+
+    //remove all of the squares that are occupied
+    return graves.filter((position) => {
+        let occupier = boardState[position[0]][position[1]]
+        if (occupier) { //piece present
+            return false
+        } else {
+            return true
+        }
+    })
 }
 
 export function validateSpell(spell, white, data, boardState) {
@@ -1280,6 +1344,7 @@ export function validateSpell(spell, white, data, boardState) {
 
             //time stop is fairly simple, just check if either king is in check - if they aren't, it's a valid time stop and the player can take another turn
             //the only complication is that this is checked twice -- once when time stop is activated, and again after the first move is made
+            
 
             break;
         case "raise-dead":
@@ -1289,12 +1354,31 @@ export function validateSpell(spell, white, data, boardState) {
             //then, check the provided target square against the starting square(s) for that piece
             //if the target square is a valid starting square for that piece, it's a valid raise dead
 
+            let piece = data[0]
+            let position = data[1]
+            let graves = graveSpots(white, piece, boardState)
+
+            let raise = false
+
+            for (const grave of graves) {
+                if (grave[0] === position[0] && grave[1] === position[1]) {
+                    raise = true
+                }
+            }
+
+            if (!raise) {
+                return false
+            }
+
+            //valid raise dead!
             break;
         case "telekinesis":
             //Instead of moving one of your own pieces, move an opponent’s pawn, following normal movement rules. Cannot capture your own pieces.
 
             //takes a pawn, which must be an enemy pawn, and the target square
             //provided that this is a valid move for the pawn (and a pawn WAS selected), it's a valid telekinesis
+
+            //functionality is entirely handled in GameBoard.jsx via bypasses, this code does nothing
 
             break;
         default:

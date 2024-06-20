@@ -71,9 +71,9 @@ body {
 
 .capped-piece {
   height: calc(var(--game-board-size) / 8);
-  max-height: calc(var(--game-board-max) / 12);
+  max-height: calc(var(--game-board-max) / 8);
   width: calc(var(--game-board-size) / 8);
-  max-width: calc(var(--game-board-max) / 12);
+  max-width: calc(var(--game-board-max) / 8);
 }
 
 .captures-col {

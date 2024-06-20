@@ -10,7 +10,7 @@ import { Button } from "@mui/material"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts, findKing, validateCheck, pawnPositions } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts, findKing, validateCheck, pawnPositions, graveSpots } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
@@ -71,6 +71,8 @@ let lastState = {
     2: ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
     1: ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
 }; //stores the game state most recently sent to the client, starts with the default
+
+let undeadPiece; //stores the piece code for a piece that is being RESURRECTED
 
 let whiteTimer = 180; //stores the ACTUAL playtime left for white
 let blackTimer = 180; //likewise for black
@@ -133,6 +135,7 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
     setBlackCaptures([])
 
     setActiveSpell("")
+    setUsedSpells([])
 
     decision = false
 }
@@ -606,6 +609,27 @@ function Board(props) {
         setActiveSpell(spell)
     }
 
+    function capPieceClicked(piece) {
+
+        if (activeSpell === "raise-dead") {
+            if (piece.startsWith("w") && clientColor === "White") {
+                // if (piece === "wPx") {
+                //     piece = "wP"
+                // }
+                undeadPiece = piece
+                setValidMoves(graveSpots(true, piece, boardState))
+            } else if (piece.startsWith("b") && clientColor === "Black") {
+                // if (piece === "bPx") {
+                //     piece = "bP"
+                // }
+                undeadPiece = piece
+                setValidMoves(graveSpots(false, piece, boardState))
+            }
+        }
+
+        // console.log("cappiece", piece)
+    }
+
     if (activeSpell) {
 
         let white
@@ -613,8 +637,6 @@ function Board(props) {
             white = true
         } else if (clientColor === "Black") {
             white = false
-        } else { //spectator shouldn't get here
-            return
         }
 
         switch (activeSpell) {
@@ -640,6 +662,9 @@ function Board(props) {
                     }
                 }
 
+                break;
+            case "raise-dead":
+                //raise dead's visuals are filled above
                 break;
             default:
                 //something weird has happened
@@ -697,9 +722,10 @@ function Board(props) {
                 return
             }
 
+            let valid
             switch (activeSpell) {
                 case "smite":
-                    let valid = validateSpell(activeSpell, white, [row, column], boardState)
+                    valid = validateSpell(activeSpell, white, [row, column], boardState)
 
                     if (valid) {
                         //SMITE THAT PIECE
@@ -749,6 +775,62 @@ function Board(props) {
                         activeSquare = [row, column] //set the active square        
                         setValidMoves(legalMoves(piece, [row, column], boardState)) //grab the legal moves
                         return
+                    }
+
+                    break;
+                case "raise-dead":
+                    valid = validateSpell("raise-dead", white, [undeadPiece, [row, column]], boardState)
+                    
+                    if (valid) {
+                        //WISE FWOM YOUW GWAVE
+                        let revived = undeadPiece
+                        if (revived === "wPx") {
+                            revived = "wP"
+                        } else if (revived === "bPx") {
+                            revived = "bP"
+                        }
+
+                        let newState = structuredClone(boardState)
+                        newState[row][column] = undeadPiece
+                        
+
+                        let newTurn 
+                        if (turn === "White") {
+                            newTurn = "Black"
+                        } else {
+                            newTurn = "White"
+                        }
+
+                        //remove from captured pieces
+                        let copy
+                        if (clientColor === "White") {
+                            copy = Array.from(blackCaptures)
+                            copy.splice(copy.indexOf(undeadPiece), 1)
+                            setBlackCaptures(copy)
+                        } else {
+                            copy = Array.from(whiteCaptures)
+                            copy.splice(copy.indexOf(undeadPiece), 1)
+                            setWhiteCaptures(copy)
+                        }
+
+                        //set the new state, by sending it via our socket and getting it echoed back
+                        sendGameState(clientRef, newState, newTurn)
+
+                        //finally, reset the activeSquare and the spell
+                        let newUsed = Array.from(usedSpells)
+                        newUsed.push("raise-dead")
+                        setUsedSpells(newUsed)
+
+                        undeadPiece = ""
+                        activeSquare = [0,0]
+                        setValidMoves([])
+                        setActiveSpell("")
+
+                        return
+                    } else { //deactivate spell, otherwise let it play out like normal
+                        activeSquare = [0,0]
+                        setValidMoves([])
+                        setActiveSpell("")
                     }
 
                     break;
@@ -943,7 +1025,7 @@ function Board(props) {
             let imagePath = getImagePath(capturedPiece)
 
             cappedWhite.push(
-                <Col className={capClasses} key={uuidv4()}>
+                <Col className={capClasses} key={uuidv4()} onClick={() => {capPieceClicked(capturedPiece)}}>
                     <img 
                         className="capped-piece"
                         src={imagePath}
@@ -957,7 +1039,7 @@ function Board(props) {
             let imagePath = getImagePath(capturedPiece)
 
             cappedBlack.push(
-                <Col className={capClasses} key={uuidv4()}>
+                <Col className={capClasses} key={uuidv4()} onClick={() => {capPieceClicked(capturedPiece)}}>
                     <img
                         className="capped-piece"
                         src={imagePath}
