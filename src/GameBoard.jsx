@@ -84,6 +84,8 @@ let colorTracker = "Spectate"; // >:(
 let whiteWinnings = 0; //REACT!!!
 let blackWinnings = 0;
 
+let enemySpells = [] //tracks enemy spells for the websocket
+
 function announceWin(winner) {
     if (decision) {
         return
@@ -138,6 +140,18 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
     setUsedSpells([])
 
     decision = false
+}
+
+function sendSpell(clientRef, spellName, color) {
+    let client = clientRef
+
+    client.send(
+        JSON.stringify({
+            "dispatch": "spell",
+            'message': spellName,
+            'turn': color,
+        })
+    )
 }
 
 function sendGameState(clientRef, boardState, nextTurn) {
@@ -254,13 +268,25 @@ function SpellButton(props) {
     const spell = props.spell
     const activateSpell = props.activateSpell
     const usedSpells = props.usedSpells
+    const disabled = props.disabled //enemy spells are disabled
 
     let used = false
 
     function useSpell() {
+        if (disabled) {
+            return
+        }
+
         if (!used) {
             activateSpell(spell)
         }
+    }
+
+    let classes = ""
+    if (disabled) {
+        classes = "enemy-spell"
+    } else {
+        classes = "spell-button"
     }
 
     if (usedSpells.includes(spell)) {
@@ -269,7 +295,7 @@ function SpellButton(props) {
     }
 
     return (
-        <Col className="spell-button">
+        <Col className={classes}>
             <Image src={src} fluid onClick={() => {useSpell()}}/>
         </Col>
     )
@@ -451,6 +477,7 @@ function Board(props) {
     //spells
     const [activeSpell, setActiveSpell] = useState("")
     const [usedSpells, setUsedSpells] = useState([])
+    const [enemyUsedSpells, setEnemyUsedSpells] = useState([])
 
     //pop ups
     const [popVisible, setPopVisible] = useState(false)
@@ -561,6 +588,12 @@ function Board(props) {
                             doPopUp("DEFEAT")
                         }
                         
+                        break;
+                    case "spell":
+                        if (object.color !== colorTracker) {
+                            enemySpells.push(object.spell)
+                            setEnemyUsedSpells(enemySpells)
+                        }
                         break;
                     default:
                         console.error("Bad data returned by the websocket: ", e.data)
@@ -747,6 +780,7 @@ function Board(props) {
                         let newUsed = Array.from(usedSpells)
                         newUsed.push("smite")
                         setUsedSpells(newUsed)
+                        sendSpell(clientRef, "smite", colorTracker)
 
                         activeSquare = [0,0]
                         setValidMoves([])
@@ -820,6 +854,7 @@ function Board(props) {
                         let newUsed = Array.from(usedSpells)
                         newUsed.push("raise-dead")
                         setUsedSpells(newUsed)
+                        sendSpell(clientRef, "raise-dead", colorTracker)
 
                         undeadPiece = ""
                         activeSquare = [0,0]
@@ -960,6 +995,7 @@ function Board(props) {
                             newUsed.push("time-stop")
                             setUsedSpells(newUsed)
                             setActiveSpell("")
+                            sendSpell(clientRef, "time-stop", colorTracker)
                         }
                     }
 
@@ -968,6 +1004,7 @@ function Board(props) {
                         newUsed.push("telekinesis")
                         setUsedSpells(newUsed)
                         setActiveSpell("")
+                        sendSpell(clientRef, "telekinesis", colorTracker)
                     }
 
                     //set the new state, by sending it via our socket and getting it echoed back
@@ -1120,6 +1157,12 @@ function Board(props) {
                 <Row className="d-flex justify-content-center">
                     <WinTracker whiteWins={whiteWins} blackWins={blackWins} />
                 </Row>
+                <Row className="d-flex justify-content-center py-1">
+                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" usedSpells={enemyUsedSpells} disabled={true}/>
+                </Row>
                 <Row>
                     <Col id="black-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center">
@@ -1162,12 +1205,12 @@ function Board(props) {
                     </Col>
                 </Row>
                 <Row className="d-flex justify-content-center py-1">
-                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells}/>
-                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells}/>
-                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells}/>
-                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells}/>
+                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
                 </Row>
-                <Row><Col className="text-center py-2 text-white poppins-light">{turnDisplay}</Col></Row>
+                <Row><Col className="text-center pt-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
         </div>
     )

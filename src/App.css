@@ -113,6 +113,11 @@ body {
   max-height: var(--spell-max);
 }
 
+.enemy-spell {
+  max-width: calc(var(--spell-max) / 2);
+  max-height: calc(var(--spell-max) / 2);
+}
+
 /* win tracker */
 
 .dot {
