@@ -1156,10 +1156,151 @@ export function validateWin(white, boardState) {
 
 }
 
-export function validateSpell() { //validates spells, not piece movement
+function threatenedSquares(pieceCode, startPosition, boardState, white) {
+    //runs the "legalMoves" function on the provided piece, then filters out any moves that don't target an enemy piece
+    //returns the remaining moves, giving all the squares "threatened" by an enemy piece
 
+    const moves = legalMoves(pieceCode, startPosition, boardState)
+    const threat = moves.filter((move) => { //FILTER BEGIN
+        const row = move[0]
+        const col = move[1]
+        const piece = boardState[row][col]
+
+        if (piece) {
+            if (white) {
+                if (piece.includes("b")) {
+                    return true //threat
+                } else {
+                    return false //own piece
+                }
+            } else {
+                if (piece.includes("w")) {
+                    return true //threat
+                } else {
+                    return false //own piece
+                }
+            }
+        } else { //no piece
+            return false
+        }
+    }) //FILTER END
+
+    return threat
 }
 
-export function validSpellcasts() {
+export function validateSpell(spell, white, data, boardState) {
+    //validates spells, not piece movement
+    //returns true or false, depending on if the spell is valid
+    //note that not all spells need the "data" parameter, and the data it contains can be quite different depending on the spell
+        //smite: takes a targeted square (ex: [X,Y])
+        //time-stop: only needs boardState (no data)
+        //raise-dead: takes a PIECE CODE and a target square (ex: [bQ, [X,Y]])
+        //telekinesis: takes a targeted square (containing a pawn) AND the square the pawn will move to (ex: [[X,Y],[X,Y]])
+
+    switch (spell) {
+        case "smite":
+            //Use your turn to instantly capture an enemy piece threatened by one of your pieces, without moving a piece. Cannot target the King or Queen.
+
+            let targetRow = data[0]
+            let targetCol = data[1]
+            let smitePiece = boardState[targetRow][targetCol]
+
+            let color
+            if (white) {
+                color = "w"
+            } else {
+                color = "b"
+            }
+
+            //first make sure we're actually targeting a piece, and that piece ISN'T a queen or king
+            if (smitePiece) {
+                if (smitePiece.includes("Q") || smitePiece.includes("K") || smitePiece.includes(color)) {
+                    return false //can't target a king, queen, or own piece
+                }
+            } else {
+                return false //can't smite an empty square
+            }
+
+            let threat = []
+
+            //first, using boardState, get a list of all squares (with enemy pieces) "threatened" by at least one piece
+            for (let i = 1; i <= 8; i++) {
+                for (let j = 0; j <= 7; j++) {
+                    let piece = boardState[i][j]
+
+                    if (piece) {
+                        if (piece.includes(color)) { //own piece
+                            let newThreat = threatenedSquares(piece, [i, j], boardState, white)
+                            threat = threat.concat(newThreat)
+                        }
+                    }
+                }
+            }
+
+            let valid = false 
+            //then, check if the provided square in data is in the list
+            for (const move of threat) {
+                if (move[0] === targetRow && move[1] === targetCol) {
+                    valid = true
+                    break;
+                }
+            }
+
+            if (!valid) {
+                return false
+            }
+            
+            //valid smite!
+            break;
+        case "time-stop":
+            //Activate, and then take an extra turn after this one, so long as neither King is in check at the beginning or end of your first turn.
+
+            //time stop is fairly simple, just check if either king is in check - if they aren't, it's a valid time stop and the player can take another turn
+            //the only complication is that this is checked twice -- once when time stop is activated, and again after the first move is made
+
+            break;
+        case "raise-dead":
+            //Use your turn to return one of your captured pieces to a valid starting position (cannot be used on a piece if their position(s) are occupied).
+
+            //first, grab the provided piece code in data
+            //then, check the provided target square against the starting square(s) for that piece
+            //if the target square is a valid starting square for that piece, it's a valid raise dead
+
+            break;
+        case "telekinesis":
+            //Instead of moving one of your own pieces, move an opponent’s pawn, following normal movement rules. Cannot capture your own pieces.
+
+            //takes a pawn, which must be an enemy pawn, and the target square
+            //provided that this is a valid move for the pawn (and a pawn WAS selected), it's a valid telekinesis
+
+            break;
+        default:
+            console.error("BAD SPELL?")
+            return false
+    }
+
+    return true //if we get to this point without throwing a "return false", it's valid
+}
+
+export function validSpellcasts(spell, white, boardState) {
     //takes a spell and the current board state and sends back all the possible valid moves for that spell
+    let moves = []
+
+    switch (spell) {
+        case "smite":
+            for (let row = 1; row <= 8; row++) {
+                for (let col = 0; col <= 7; col++) {
+                    let valid = validateSpell(spell, white, [row, col], boardState)
+        
+                    if (valid) {
+                        moves.push([row, col])
+                    }
+                }
+            }
+            break;
+        default:
+            return []
+    }
+
+    return moves
 }

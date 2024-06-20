@@ -10,7 +10,7 @@ import { Button } from "@mui/material"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
@@ -101,7 +101,7 @@ function announceWin(winner) {
     )
 }
 
-function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures) {
+function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells) {
     //reset the board
     setBoardState({
         8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -131,6 +131,8 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setWhiteCaptures([])
     setBlackCaptures([])
+
+    setActiveSpell("")
 
     decision = false
 }
@@ -245,11 +247,22 @@ function WinTracker(props) {
 }
 
 function SpellButton(props) {
-    const src = props.src
+    let src = props.src
     const spell = props.spell
+    const activateSpell = props.activateSpell
+    const usedSpells = props.usedSpells
+
+    let used = false
 
     function useSpell() {
-        console.log("spell", spell)
+        if (!used) {
+            activateSpell(spell)
+        }
+    }
+
+    if (usedSpells.includes(spell)) {
+        src = `${imgUrl}/used-spell.png`
+        used = true
     }
 
     return (
@@ -432,11 +445,16 @@ function Board(props) {
     const [whiteWins, setWhiteWins] = useState(0)
     const [blackWins, setBlackWins] = useState(0)
 
+    //spells
+    const [activeSpell, setActiveSpell] = useState("")
+    const [usedSpells, setUsedSpells] = useState([])
+
     //pop ups
     const [popVisible, setPopVisible] = useState(false)
     const [popText, setPopText] = useState("")
     const [queuedPopText, setQueuedPopText] = useState("")
 
+    //lobby props
     const lobby = props.lobby
     const lobbyPrivate = props.lobbyPrivate
 
@@ -521,7 +539,7 @@ function Board(props) {
                         break;
                     case "next-round":
                         //reset and begin a new round
-                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures)
+                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells)
                         doPopUp("The true victor is still undecided. Another round!")
 
                         clientRef.send( //echo back to let the server know the message was recieved
@@ -548,6 +566,50 @@ function Board(props) {
             }
         };
     }, [])
+
+    //SPELLS
+
+    function activateSpell(spell) {
+        if (!canPlay) {
+            return
+        }
+
+        if (turn !== clientColor) {
+            return //player can only move on their own turn
+        }
+
+        //deactivate active square when changing spells
+        activeSquare = [0,0]
+        setValidMoves([])
+
+        console.log("spell", spell)
+        setActiveSpell(spell)
+    }
+
+    if (activeSpell) {
+        switch (activeSpell) {
+            case "smite":
+                if (validMoves.length < 1) { //haven't already validated moves
+                    let white
+                    if (clientColor === "White") {
+                        white = true
+                    } else if (clientColor === "Black") {
+                        white = false
+                    } else { //spectator shouldn't get here
+                        return
+                    }
+
+                    let casts = validSpellcasts(activeSpell, white, boardState)
+                    
+                    if (casts.length > 0) { //valid moves available
+                        setValidMoves(casts)
+                    }
+                }
+            default:
+                break;
+        }
+
+    }
 
     function doPopUp(text) {
         //queue
@@ -583,6 +645,61 @@ function Board(props) {
 
         if (turn !== clientColor) {
             return //player can only move on their own turn
+        }
+
+        if (activeSpell) {
+            //currently active spell
+
+            let white
+            if (clientColor === "White") {
+                white = true
+            } else if (clientColor === "Black") {
+                white = false
+            } else { //spectator shouldn't get here
+                return
+            }
+
+            switch (activeSpell) {
+                case "smite":
+                    let valid = validateSpell(activeSpell, white, [row, column], boardState)
+
+                    if (valid) {
+                        //SMITE THAT PIECE
+
+                        let newState = structuredClone(boardState)
+                        newState[row][column] = ""
+
+                        let newTurn 
+                        if (turn === "White") {
+                            newTurn = "Black"
+                        } else {
+                            newTurn = "White"
+                        }
+
+                        //set the new state, by sending it via our socket and getting it echoed back
+                        sendGameState(clientRef, newState, newTurn)
+
+                        //finally, reset the activeSquare and the spell
+                        let newUsed = Array.from(usedSpells)
+                        newUsed.push("smite")
+                        setUsedSpells(newUsed)
+
+                        activeSquare = [0,0]
+                        setValidMoves([])
+                        setActiveSpell("")
+
+                        return
+                    } else { //deactivate spell, otherwise let the function play out like normal
+                        activeSquare = [0,0]
+                        setValidMoves([])
+                        setActiveSpell("")
+                    }
+
+                    break;
+                default:
+                    //ignore
+                    break;
+            }
         }
 
         let piece = boardState[row][column]
@@ -631,7 +748,6 @@ function Board(props) {
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
                     console.log("Valid move!")
-                    setValidMoves([])
 
                     //handle captures
                     let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
@@ -691,6 +807,7 @@ function Board(props) {
 
                     //finally, reset the activeSquare
                     activeSquare = [0,0]
+                    setValidMoves([])
                 } else {
                     console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
@@ -833,7 +950,7 @@ function Board(props) {
             {popUp}
             <Container>
                 <Row className="d-flex justify-content-center">
-                    <WinTracker/>
+                    <WinTracker whiteWins={whiteWins} blackWins={blackWins} />
                 </Row>
                 <Row>
                     <Col id="black-captures" className="pb-2">
@@ -877,10 +994,10 @@ function Board(props) {
                     </Col>
                 </Row>
                 <Row className="d-flex justify-content-center py-1">
-                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" />
-                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop"/>
-                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" />
-                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" />
+                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells}/>
+                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells}/>
+                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells}/>
+                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells}/>
                 </Row>
                 <Row><Col className="text-center py-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
