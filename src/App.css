@@ -1,11 +1,13 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
   --game-board-size: 87.5vw; /* 800px */
-  --game-board-max: 78.5vh;
+  --game-board-max: 63vh;
   --board-background-size: 100vw;
-  --board-background-max: 90vh;
+  --board-background-max: 72vh;
   --timer-size: 15vw;
   --timer-max: 12vh;
+  --spell-max: 13vh;
+  --dot-size: 25px;
 }
 
 html {
@@ -105,6 +107,54 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+.spell-button {
+  max-width: var(--spell-max);
+  max-height: var(--spell-max);
+}
+
+/* win tracker */
+
+.dot {
+  margin-left: 2px;
+  margin-right: 2px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  height: var(--dot-size);
+  width: var(--dot-size);
+
+  background-color: #bbb;
+  
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 50%;
+  
+  display: inline-block;
+}
+
+.red-dot {
+  background-color: #99014e;
+}
+
+.blue-dot {
+  background-color: #202f83;
+}
+
+.win-tracker {
+  display: flex;
+  justify-content: center;
+  border-style: solid;
+  border-top: 4px solid black;
+  border-bottom: 4px solid black;
+  border-right: 0px solid black;
+  border-left: 0px solid black;
+  max-width: calc(var(--dot-size) * 7);
+  margin-bottom: 10px;
+}
+
+/* Lobby UI */
 
 .lobby-input {
   background-color: white;

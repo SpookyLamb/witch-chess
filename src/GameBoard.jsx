@@ -79,6 +79,9 @@ let decision = false; //tells React not to declare a winner repeatedly
 let popSentinel = false; //makes React behave with the pop ups and actually queue them up >:(
 let colorTracker = "Spectate"; // >:(
 
+let whiteWinnings = 0; //REACT!!!
+let blackWinnings = 0;
+
 function announceWin(winner) {
     if (decision) {
         return
@@ -196,6 +199,64 @@ function getImagePath(piece) {
     }
 
     return imagePath
+}
+
+function WinTracker(props) {
+    const blackWins = props.blackWins
+    const whiteWins = props.whiteWins
+
+    let dot1 = ""
+    let dot2 = ""
+    let dot3 = ""
+    let dot4 = ""
+    let dot5 = ""
+
+    if (blackWins > 0) {
+        dot1 = "red-dot"
+        
+        if (blackWins > 1) {
+            dot2 = "red-dot"
+        }
+        if (blackWins > 2) {
+            dot3 = "red-dot"
+        }
+    }
+
+    if (whiteWins > 0) {
+        dot5 = "blue-dot"
+
+        if (whiteWins > 1) {
+            dot4 = "blue-dot"
+        }
+        if (whiteWins > 2) {
+            dot3 = "blue-dot"
+        }
+    }
+
+    return (
+        <div className="win-tracker py-1">
+            <div className={"dot " + dot1}/>
+            <div className={"dot " + dot2}/>
+            <div className={"dot " + dot3}/>
+            <div className={"dot " + dot4}/>
+            <div className={"dot " + dot5}/>
+        </div>
+    )
+}
+
+function SpellButton(props) {
+    const src = props.src
+    const spell = props.spell
+
+    function useSpell() {
+        console.log("spell", spell)
+    }
+
+    return (
+        <Col className="spell-button">
+            <Image src={src} fluid onClick={() => {useSpell()}}/>
+        </Col>
+    )
 }
 
 function PopUp(props) {
@@ -368,6 +429,9 @@ function Board(props) {
 
     const [validMoves, setValidMoves] = useState([])
 
+    const [whiteWins, setWhiteWins] = useState(0)
+    const [blackWins, setBlackWins] = useState(0)
+
     //pop ups
     const [popVisible, setPopVisible] = useState(false)
     const [popText, setPopText] = useState("")
@@ -444,9 +508,13 @@ function Board(props) {
                         break;
                     case "timeout": //informs the players that a player has timed out, winning the game for the other player automatically
                         if (object.color === "White") {
+                            blackWinnings += 1
+                            setBlackWins(blackWinnings)
                             announceWin("Black")
                             doPopUp("Time OUT for White! Black has won the game!")
                         } else if (object.color === "Black") {
+                            whiteWinnings += 1
+                            setWhiteWins(whiteWinnings)
                             announceWin("White")
                             doPopUp("Time OUT for Black! White has won the game!")
                         }
@@ -711,6 +779,14 @@ function Board(props) {
                     announceWin("Draw")
                     doPopUp("Stalemate!")
                 } else {
+                    if (winner === "White") {
+                        whiteWinnings += 1
+                        setWhiteWins(whiteWinnings)
+                    } else {
+                        blackWinnings += 1
+                        setBlackWins(blackWinnings)
+                    }
+
                     announceWin(winner)
                     doPopUp(winner + " has won the game!")
                 }
@@ -756,8 +832,11 @@ function Board(props) {
         <div>
             {popUp}
             <Container>
+                <Row className="d-flex justify-content-center">
+                    <WinTracker/>
+                </Row>
                 <Row>
-                    <Col id="black-captures">
+                    <Col id="black-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
                                 <div className="timer mx-auto">
@@ -780,7 +859,7 @@ function Board(props) {
                             </div>
                         </div>
                     </Col>
-                    <Col id="white-captures" className="">
+                    <Col id="white-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center flex-row-reverse">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
                                 <div className="timer mx-auto">
@@ -797,7 +876,13 @@ function Board(props) {
                         </Row>
                     </Col>
                 </Row>
-                <Row><Col className="text-center pt-3 pb-2 text-white poppins-light">{turnDisplay}</Col></Row>
+                <Row className="d-flex justify-content-center py-1">
+                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" />
+                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop"/>
+                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" />
+                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" />
+                </Row>
+                <Row><Col className="text-center py-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
         </div>
     )
