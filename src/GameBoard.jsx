@@ -10,7 +10,7 @@ import { Button } from "@mui/material"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts, findKing, validateCheck } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
@@ -578,6 +578,25 @@ function Board(props) {
             return //player can only move on their own turn
         }
 
+        if (spell === activeSpell) { //double click, cancel
+            setActiveSpell("")
+            return
+        }
+
+        if (spell === "time-stop") {
+            //make sure neither king is in check
+            let whiteKing = findKing(true, boardState)
+            let blackKing = findKing(false, boardState)
+
+            let whiteInCheck = validateCheck(true, whiteKing[0], whiteKing[1], boardState)
+            let blackInCheck = validateCheck(false, blackKing[0], blackKing[1], boardState)
+
+            if (whiteInCheck || blackInCheck) {
+                doPopUp("You can't stop time while a king is in check!")
+                return
+            } //otherwise, proceed
+        }
+
         //deactivate active square when changing spells
         activeSquare = [0,0]
         setValidMoves([])
@@ -605,7 +624,12 @@ function Board(props) {
                         setValidMoves(casts)
                     }
                 }
+            case "time-stop":
+                //no special visuals for time stop
+                break;
             default:
+                //something weird has happened
+                setActiveSpell("")
                 break;
         }
 
@@ -698,6 +722,7 @@ function Board(props) {
                     break;
                 default:
                     //ignore
+                    //time stop is handled AFTER a move is made
                     break;
             }
         }
@@ -794,12 +819,34 @@ function Board(props) {
                             setBlackCaptures(captures)
                         }
                     }
-                    
+
                     let newTurn 
                     if (turn === "White") {
                         newTurn = "Black"
                     } else {
                         newTurn = "White"
+                    }
+
+                    //ZA WARUDO - handle time stop
+                    if (activeSpell === "time-stop") {
+                        let whiteKing = findKing(true, boardState)
+                        let blackKing = findKing(false, boardState)
+    
+                        let whiteInCheck = validateCheck(true, whiteKing[0], whiteKing[1], boardState)
+                        let blackInCheck = validateCheck(false, blackKing[0], blackKing[1], boardState)
+    
+                        if (whiteInCheck || blackInCheck) {
+                            //let the move go through, but chide the player
+                            doPopUp("You can't stop time while a king is in check!")
+                        } else {
+                            newTurn = turn + "TS" //take another turn :)
+                            //TS tells the backend that timestop was used
+
+                            let newUsed = Array.from(usedSpells) //...and kill time stop
+                            newUsed.push("time-stop")
+                            setUsedSpells(newUsed)
+                            setActiveSpell("")
+                        }
                     }
 
                     //set the new state, by sending it via our socket and getting it echoed back

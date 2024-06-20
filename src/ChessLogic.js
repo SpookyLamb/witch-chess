@@ -1,5 +1,5 @@
 
-function findKing(white, boardState) {
+export function findKing(white, boardState) {
     //finds a given king's position
 
     let kingToFind
