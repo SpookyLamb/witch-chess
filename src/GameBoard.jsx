@@ -665,18 +665,20 @@ function Board(props) {
             }
         }
 
+        const capClasses = "px-0"
+
         //fill our captures while we're at it
         for (const capturedPiece of whiteCaptures) {
             let imagePath = getImagePath(capturedPiece)
 
             cappedWhite.push(
-                <div key={uuidv4()}>
+                <Col className={capClasses} key={uuidv4()}>
                     <img 
                         className="capped-piece"
                         src={imagePath}
                     />
                     <br/>
-                </div>
+                </Col>
             )
         }
 
@@ -684,13 +686,13 @@ function Board(props) {
             let imagePath = getImagePath(capturedPiece)
 
             cappedBlack.push(
-                <div key={uuidv4()}>
+                <Col className={capClasses} key={uuidv4()}>
                     <img
                         className="capped-piece"
                         src={imagePath}
                     />
                     <br/>
-                </div>
+                </Col>
             )
         }
 
@@ -755,15 +757,23 @@ function Board(props) {
             {popUp}
             <Container>
                 <Row>
-                    <Col id="black-captures" className="text-end">
-                        <div className="timer mx-auto">
-                            <div className="time-text">
-                                {formatSeconds(blackTime)}
-                            </div>
-                        </div>
-                        {cappedBlack}
+                    <Col id="black-captures">
+                        <Row className="d-flex justify-content-center text-center">
+                            <Col className="col-2 col-lg-12 px-0 align-self-start">
+                                <div className="timer mx-auto">
+                                    <div className="time-text text-center d-flex justify-content-center">
+                                        {formatSeconds(blackTime)}
+                                    </div>
+                                </div>
+                            </Col>
+                            <Col className="col-10 col-lg-12 captures-col">
+                                <Row>
+                                    {cappedBlack}
+                                </Row>
+                            </Col>
+                        </Row>
                     </Col>
-                    <Col className="game-board d-flex justify-content-center align-items-center">
+                    <Col className="game-board d-flex justify-content-center align-items-center px-0">
                         <div className="chess-board-background">
                             <div className="chess-grid">
                                 {boardElements}
@@ -771,15 +781,23 @@ function Board(props) {
                         </div>
                     </Col>
                     <Col id="white-captures" className="">
-                        <div className="timer mx-auto">
-                            <div className="time-text">
-                                {formatSeconds(whiteTime)}
-                            </div>
-                        </div>
-                        {cappedWhite}
+                        <Row className="d-flex justify-content-center text-center flex-row-reverse">
+                            <Col className="col-2 col-lg-12 px-0 align-self-start">
+                                <div className="timer mx-auto">
+                                    <div className="time-text text-center d-flex justify-content-center">
+                                        {formatSeconds(whiteTime)}
+                                    </div>
+                                </div>
+                            </Col>
+                            <Col className="col-10 col-lg-12 captures-col">
+                                <Row>
+                                    {cappedWhite}
+                                </Row>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
-                <Row><Col className="text-center pb-2 text-white poppins-light">{turnDisplay}</Col></Row>
+                <Row><Col className="text-center pt-3 pb-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
         </div>
     )

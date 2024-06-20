@@ -1,11 +1,11 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
-  --game-board-size: 75.5vw; /* 800px */
-  --game-board-max: 75.5vh;
-  --board-background-size: 90vw;
+  --game-board-size: 87.5vw; /* 800px */
+  --game-board-max: 78.5vh;
+  --board-background-size: 100vw;
   --board-background-max: 90vh;
-  --timer-size: 10vw;
-  --timer-max: 10vh;
+  --timer-size: 15vw;
+  --timer-max: 12vh;
 }
 
 html {
@@ -69,9 +69,13 @@ body {
 
 .capped-piece {
   height: calc(var(--game-board-size) / 8);
-  max-height: calc(var(--game-board-max) / 8);
+  max-height: calc(var(--game-board-max) / 12);
   width: calc(var(--game-board-size) / 8);
-  max-width: calc(var(--game-board-max) / 8);
+  max-width: calc(var(--game-board-max) / 12);
+}
+
+.captures-col {
+  max-width: 77vw;
 }
 
 .timer {
@@ -82,15 +86,19 @@ body {
   background-repeat: no-repeat;
   background-size: contain;
 
-  height: calc(var(--timer-size) * 1.2);
+  height: var(--timer-size);
   width: var(--timer-size);
-  max-height: calc(var(--timer-max)) * 1.2;
+  max-height: var(--timer-max);
   max-width: var(--timer-max);
 }
 
 .time-text {
   font-size: larger;
   margin: auto;
+  /* margin-top: calc(var(--timer-size) * 0.3);
+  margin-bottom: auto;
+  margin-right: auto;
+  margin-left: auto; */
   color: white;
   text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
   font-family: "Poppins", sans-serif;
