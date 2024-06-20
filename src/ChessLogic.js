@@ -1156,6 +1156,7 @@ export function validateWin(white, boardState) {
 
 }
 
+//used by smite
 function threatenedSquares(pieceCode, startPosition, boardState, white) {
     //runs the "legalMoves" function on the provided piece, then filters out any moves that don't target an enemy piece
     //returns the remaining moves, giving all the squares "threatened" by an enemy piece
@@ -1186,6 +1187,28 @@ function threatenedSquares(pieceCode, startPosition, boardState, white) {
     }) //FILTER END
 
     return threat
+}
+
+export function pawnPositions(white, boardState) {
+    let pawns = []
+
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            let piece = boardState[i][j]
+            
+            if (white) {
+                if (piece === "wP" || piece === "wPx") {
+                    pawns.push([i,j])
+                }
+            } else {
+                if (piece === "bP" || piece === "bPx") {
+                    pawns.push([i,j])
+                }
+            }
+        }
+    }
+
+    return pawns
 }
 
 export function validateSpell(spell, white, data, boardState) {

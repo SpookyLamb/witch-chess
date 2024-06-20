@@ -10,7 +10,7 @@ import { Button } from "@mui/material"
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts, findKing, validateCheck } from "./ChessLogic"
+import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves, validateSpell, validSpellcasts, findKing, validateCheck, pawnPositions } from "./ChessLogic"
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
@@ -580,6 +580,7 @@ function Board(props) {
 
         if (spell === activeSpell) { //double click, cancel
             setActiveSpell("")
+            setValidMoves([])
             return
         }
 
@@ -606,26 +607,39 @@ function Board(props) {
     }
 
     if (activeSpell) {
+
+        let white
+        if (clientColor === "White") {
+            white = true
+        } else if (clientColor === "Black") {
+            white = false
+        } else { //spectator shouldn't get here
+            return
+        }
+
         switch (activeSpell) {
             case "smite":
                 if (validMoves.length < 1) { //haven't already validated moves
-                    let white
-                    if (clientColor === "White") {
-                        white = true
-                    } else if (clientColor === "Black") {
-                        white = false
-                    } else { //spectator shouldn't get here
-                        return
-                    }
-
                     let casts = validSpellcasts(activeSpell, white, boardState)
                     
                     if (casts.length > 0) { //valid moves available
                         setValidMoves(casts)
                     }
                 }
+                break;
             case "time-stop":
                 //no special visuals for time stop
+                break;
+            case "telekinesis":
+                //highlight the enemy pawns during telekinesis
+                if (validMoves.length < 1) {
+                    let pawns = pawnPositions(!white, boardState)
+
+                    if (pawns.length > 0) {
+                        setValidMoves(pawns)
+                    }
+                }
+
                 break;
             default:
                 //something weird has happened
@@ -717,6 +731,24 @@ function Board(props) {
                         activeSquare = [0,0]
                         setValidMoves([])
                         setActiveSpell("")
+                    }
+
+                    break;
+                case "telekinesis":
+                    let piece = boardState[row][column]
+
+                    if (activeSquare[0] === 0) { //no currently active square if row is 0
+                        if (piece) { //empty strings (aka, no piece) are false
+                            if (turn === "White" && !piece.startsWith("bP")) {
+                                return //White can only move black pawns with telekinesis active
+                            } else if (turn === "Black" && !piece.startsWith("wP")) {
+                                return //Black can only move white pawns with telekinesis active
+                            }
+                        }
+
+                        activeSquare = [row, column] //set the active square        
+                        setValidMoves(legalMoves(piece, [row, column], boardState)) //grab the legal moves
+                        return
                     }
 
                     break;
@@ -847,6 +879,13 @@ function Board(props) {
                             setUsedSpells(newUsed)
                             setActiveSpell("")
                         }
+                    }
+
+                    if (activeSpell === "telekinesis") { //kill telekinesis
+                        let newUsed = Array.from(usedSpells)
+                        newUsed.push("telekinesis")
+                        setUsedSpells(newUsed)
+                        setActiveSpell("")
                     }
 
                     //set the new state, by sending it via our socket and getting it echoed back
