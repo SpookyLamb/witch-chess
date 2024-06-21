@@ -18,11 +18,11 @@ import { addWin, debug } from "./api"
 import { Lobby } from "./Game"
 import { AuthContext } from "./authContext"
 
-let imgUrl = "assets"
+let imgUrl = "src/assets"
 
-if (debug) {
-    imgUrl = "src/assets"
-}
+// if (debug) {
+//     imgUrl = "src/assets"
+// }
 
 //pictures
 const imageSources = {
@@ -301,7 +301,6 @@ function SpellButton(props) {
 
     if (activeSpell === spell) {
         //it's me, I'm active!
-        console.log("highlight")
         classes += " spell-highlight"
     }
 
@@ -509,7 +508,7 @@ function Board(props) {
 
         clientRef.onmessage = (e) => {
             if (typeof e.data === 'string') {
-                console.log("Received: ", e.data);
+                //console.log("Received: ", e.data);
 
                 let object = JSON.parse(e.data)
 
@@ -685,7 +684,6 @@ function Board(props) {
         activeSquare = [0,0]
         setValidMoves([])
 
-        console.log("spell", spell)
         setActiveSpell(spell)
     }
 
@@ -707,7 +705,6 @@ function Board(props) {
             }
         }
 
-        // console.log("cappiece", piece)
     }
 
     if (activeSpell) {
@@ -928,8 +925,6 @@ function Board(props) {
 
         let piece = boardState[row][column]
 
-        //console.log("ROW: ", row, " COLUMN: ", column + 1, " PIECE: ", piece)
-
         if (activeSquare[0] === 0) { //no currently active square if row is 0
 
             //check the clicked square to see if it has a piece, via boardState
@@ -946,10 +941,7 @@ function Board(props) {
                 }
                 activeSquare = [row, column] //set the active square
                 
-                setValidMoves(legalMoves(piece, [row, column], boardState)) //grab the legal moves
-
-                console.log("Active square set!", activeSquare)
-            
+                setValidMoves(legalMoves(piece, [row, column], boardState)) //grab the legal moves            
             } else { //square doesn't have a piece
                 setValidMoves([])
                 return //do nothing, empty squares can't become active
@@ -959,7 +951,6 @@ function Board(props) {
             if (activeSquare[0] === row && activeSquare[1] === column) {
                 activeSquare = [0,0]
                 setValidMoves([])
-                console.log("Active square reset!")
             } else { //new square, check if it has a valid move
                 
                 let copyState = structuredClone(boardState) //get a mutable copy
@@ -971,8 +962,6 @@ function Board(props) {
 
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
-                    console.log("Valid move!")
-
                     //handle captures
                     let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
                     
@@ -1064,7 +1053,6 @@ function Board(props) {
                     activeSquare = [0,0]
                     setValidMoves([])
                 } else {
-                    console.log("Invalid move!")
                     activeSquare = [0,0] //reset, try again
                     setValidMoves([])
                     return //ignore the move, as it is invalid
@@ -1078,8 +1066,6 @@ function Board(props) {
 
         //by default, draws as though the player is white
         //this only affects the visuals - gameplay and calculations are identical regardless
-
-        //console.log(validMoves)
 
         for (let i = 1; i <= 8; i++) { //row loop
             for (let j = 7; j >= 0; j--) { //column loop

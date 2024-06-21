@@ -21,10 +21,8 @@ const checkToken = ({ auth, setPageData }) => {
           Authorization: `Bearer ${auth.accessToken}`
       },
   }).then(response => {
-      console.log('CHECK TOKEN RESPONSE: ', response)
       setPageData(<Game/>)
   }).catch(error => {
-      console.log("ERROR: ", error)
       setPageData(<Login />)
   })
 }

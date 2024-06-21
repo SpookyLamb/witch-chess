@@ -2,7 +2,7 @@ import axios from 'axios'
 
 //REMEMBER TO CLOSE ANY OPEN LOCAL TABS BEFORE CHANGING THE COMMENTS ON THESE, ELSE YOU'LL CREATE ZOMBIE CLIENTS
 
-export const debug = true //change to FALSE for production!
+export const debug = false //change to FALSE for production!
 
 export const baseUrl = import.meta.env.VITE_BASEURL
 export const wsBaseUrl = import.meta.env.VITE_WSBASEURL
@@ -12,13 +12,11 @@ export const wsBaseUrl = import.meta.env.VITE_WSBASEURL
 export function saveLogin(authToken, authRefresh) {
     localStorage.setItem("access", authToken)
     localStorage.setItem("refresh", authRefresh)
-    console.log("Saved login information.")
 }
 
 export function deleteLogin() {
     localStorage.removeItem("access")
     localStorage.removeItem("refresh")
-    console.log("Deleted old login information.")
 }
 
 //user auth
@@ -76,7 +74,6 @@ export const fetchLobbies = ({ auth, setLobbies }) => {
             Authorization: `Bearer ${auth.accessToken}`
         },
     }).then(response => {
-        //console.log('FETCH LOBBIES RESPONSE: ', response)
         setLobbies(response.data)
     }).catch(error => console.log("ERROR: ", error))
 }
