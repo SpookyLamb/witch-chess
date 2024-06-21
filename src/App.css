@@ -203,12 +203,14 @@ body {
 
 .modal-content {
   background: white;
-  padding: 40px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-  width: 60%;
+  width: 90%;
   max-width: 600px;
+  max-height: 90vh;
   position: relative;
+  overflow-y: scroll;
 }
 
 .rules-piece {
@@ -252,7 +254,7 @@ h3 {
 
 p {
   font-family: "Poppins", sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   font-style: normal;
 }
 
