@@ -218,11 +218,14 @@ function Lobby(props) {
     )
 }
 
-function Title() {
+export function Title() {
     return (
-        <h1 className="text-white text-center pt-3">
-            WITCH CHESS
-        </h1>
+        <>
+            <h1 className="text-white text-center pt-3">
+                WITCH CHESS
+            </h1>
+            <h5 className="text-white text-center pt-1">"Blitz Chess with magic!"</h5>
+        </>
     )
 }
 
@@ -264,7 +267,7 @@ function Rules(props) {
         <li><img className="rules-piece" src={imageSources.whiteKing}/> <img className="rules-piece" src={imageSources.blackKing}/> &nbsp;Kings </li>
         </ul>
         <p>
-            <strong>Witches are impatient!</strong> You only have three minutes for each game (gaining two seconds when you make a move). 
+            <strong>Witches are impatient!</strong> You only have three minutes for each game (gaining three seconds when you make a move). 
             Running out of time is an instant loss! It's better to make a bad move quickly than spend too much time trying to 
             come up with the perfect move!
         </p>

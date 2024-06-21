@@ -9,6 +9,8 @@ import { useContext, useState } from "react"
 import { AuthContext } from "./authContext"
 import { createUser, getToken } from "./api"
 
+import { Title } from "./Game"
+
 function CreateUser() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -157,8 +159,7 @@ function Login() {
 
     return (
         <Container className="p-5 text-center text-white">
-            <h1 className="text-center p-3 pt-1">WITCH CHESS</h1>
-            {/* <hr className="pb-2" /> */}
+            <Title/>
             <br/>
             {display}
             <Button className="pt-3 mytextbutton" variant="text" onClick={() => {
