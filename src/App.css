@@ -6,7 +6,7 @@
   --board-background-max: 72vh;
   --timer-size: 15vw;
   --timer-max: 12vh;
-  --spell-max: 13vh;
+  --spell-max: 12vh;
   --dot-size: 25px;
 }
 
@@ -113,9 +113,18 @@ body {
   max-height: var(--spell-max);
 }
 
+.spell-button:hover {
+  max-width: calc(var(--spell-max) + 1vh);
+  max-height: calc(var(--spell-max) + 1vh);
+}
+
 .enemy-spell {
   max-width: calc(var(--spell-max) / 2);
   max-height: calc(var(--spell-max) / 2);
+}
+
+.spell-highlight {
+  filter: hue-rotate(180deg);
 }
 
 /* win tracker */

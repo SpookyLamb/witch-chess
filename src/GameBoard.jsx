@@ -266,6 +266,7 @@ function WinTracker(props) {
 function SpellButton(props) {
     let src = props.src
     const spell = props.spell
+    const activeSpell = props.activeSpell
     const activateSpell = props.activateSpell
     const usedSpells = props.usedSpells
     const disabled = props.disabled //enemy spells are disabled
@@ -292,6 +293,12 @@ function SpellButton(props) {
     if (usedSpells.includes(spell)) {
         src = `${imgUrl}/used-spell.png`
         used = true
+    }
+
+    if (activeSpell === spell) {
+        //it's me, I'm active!
+        console.log("highlight")
+        classes += " spell-highlight"
     }
 
     return (
@@ -386,7 +393,8 @@ function Square(props) {
         }
 
         displayPiece = (
-            <Image 
+            <Image
+                className="chess-piece"
                 alt={alt}
                 src={imagePath}
                 fluid
@@ -1215,10 +1223,14 @@ function Board(props) {
                     </Col>
                 </Row>
                 <Row className="d-flex justify-content-center py-1">
-                    <SpellButton src={`${imgUrl}/${spellColor}-smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/${spellColor}-time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/${spellColor}-raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/${spellColor}-telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-smite.png`} spell="smite" 
+                    activeSpell={activeSpell} activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-time-stop.png`} spell="time-stop" 
+                    activeSpell={activeSpell} activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-raise-dead.png`} spell="raise-dead" 
+                    activeSpell={activeSpell} activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-telekinesis.png`} spell="telekinesis" 
+                    activeSpell={activeSpell} activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
                 </Row>
                 <Row><Col className="text-center pt-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
