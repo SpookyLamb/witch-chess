@@ -35,8 +35,8 @@ body {
   max-width: var(--board-background-max);
   height: var(--board-background-size);
   width: var(--board-background-size);
-
-  background-image: url("src/assets/chess-board.png");
+  
+  background-image: url("https://witch-chess.vercel.app/src/assets/chess-board.png"); /* src/assets/chess-board.png */
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -84,7 +84,7 @@ body {
   display: flex;
   align-items: center;
 
-  background-image: url("src/assets/hourglass.png");
+  background-image: url("https://witch-chess.vercel.app/src/assets/hourglass.png"); /* src/assets/hourglass.png */
   background-repeat: no-repeat;
   background-size: contain;
 
