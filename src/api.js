@@ -34,7 +34,15 @@ export const createUser = ({username, password, email}) => {
         }
     }).then(response => {
         console.log("CREATE USER RESPONSE: ", response)
-    }).catch(error => console.log('ERROR: ', error))
+        if (response.status === 200 || response.status === 201 || response.status === 202) {
+            alert("Account created successfully! Please log in.")
+        } else {
+            alert("Account creation failed! Please check your connection/the information you entered and try again!")
+        }
+    }).catch(error => {
+        console.log('ERROR: ', error)
+        alert("Account creation failed! Please check your connection/the information you entered and try again!")
+    })
 }
 
 export const getToken = ({ auth, username, password }) => {
