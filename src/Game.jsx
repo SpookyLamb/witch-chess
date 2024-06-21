@@ -22,11 +22,11 @@ import { v4 as uuidv4 } from "uuid"
 
 import { debug } from "./api"
 
-let imgUrl = "assets"
+let imgUrl = "src/assets"
 
-if (debug) {
-    imgUrl = "src/assets"
-}
+// if (debug) {
+//     imgUrl = "src/assets"
+// }
 
 //pictures
 const imageSources = {    
