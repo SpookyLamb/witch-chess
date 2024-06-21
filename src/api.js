@@ -1,26 +1,22 @@
 import axios from 'axios'
 
-//export const baseUrl = 'http://127.0.0.1:8000' //local dev
-export const baseUrl = 'https://witch-chess-backend.fly.dev' //production
+//REMEMBER TO CLOSE ANY OPEN LOCAL TABS BEFORE CHANGING THE COMMENTS ON THESE, ELSE YOU'LL CREATE ZOMBIE CLIENTS
 
-//export const wsBaseUrl = "127.0.0.1:8000" //local dev
-export const wsBaseUrl = "witch-chess-backend.fly.dev" //production
+export const debug = false //change to FALSE for production!
+
+export const baseUrl = import.meta.env.VITE_BASEURL
+export const wsBaseUrl = import.meta.env.VITE_WSBASEURL
 
 //helper functions
 
 export function saveLogin(authToken, authRefresh) {
     localStorage.setItem("access", authToken)
     localStorage.setItem("refresh", authRefresh)
-    //localStorage.setItem("username", username)
-    console.log("Saved login information.")
 }
 
 export function deleteLogin() {
     localStorage.removeItem("access")
     localStorage.removeItem("refresh")
-    //localStorage.removeItem("username")
-    //localStorage.removeItem("userID")
-    console.log("Deleted old login information.")
 }
 
 //user auth
@@ -36,7 +32,15 @@ export const createUser = ({username, password, email}) => {
         }
     }).then(response => {
         console.log("CREATE USER RESPONSE: ", response)
-    }).catch(error => console.log('ERROR: ', error))
+        if (response.status === 200 || response.status === 201 || response.status === 202) {
+            alert("Account created successfully! Please log in.")
+        } else {
+            alert("Account creation failed! Please check your connection/the information you entered and try again!")
+        }
+    }).catch(error => {
+        console.log('ERROR: ', error)
+        alert("Account creation failed! Please check your connection/the information you entered and try again!")
+    })
 }
 
 export const getToken = ({ auth, username, password }) => {
@@ -50,20 +54,6 @@ export const getToken = ({ auth, username, password }) => {
     }).catch(error => console.log("ERROR: ", error))
 }
 
-// const getUserID = (accessToken, auth) => {
-//     axios({
-//         method: 'get',
-//         url: `${baseUrl}/user-id/`,
-//         headers: {
-//             Authorization: `Bearer ${accessToken}`
-//         },
-//     }).then(response => {
-//         console.log("GET USER RESPONSE: ", response)
-//         auth.setUserID(response.data.id)
-//         localStorage.setItem("userID", response.data.id)
-//     }).catch(error => console.log("ERROR: ", error))
-// }
-
 export const fetchUser = ({ auth }) => {
     axios({
         method: 'get',
@@ -76,3 +66,40 @@ export const fetchUser = ({ auth }) => {
     }).catch(error => console.log("ERROR: ", error))
 }
 
+export const fetchLobbies = ({ auth, setLobbies }) => {
+    axios({
+        method: 'get',
+        url: `${baseUrl}/lobbies/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+    }).then(response => {
+        setLobbies(response.data)
+    }).catch(error => console.log("ERROR: ", error))
+}
+
+export const getWins = ({auth, setWins}) => {
+    axios({
+        method: 'get',
+        url: `${baseUrl}/get-win/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+    }).then(response => {
+        setWins(response.data)
+    }).catch(error => console.log("ERROR: ", error))
+}
+
+export const addWin = ({auth}) => {
+    axios({
+        method: 'post',
+        url: `${baseUrl}/add-win/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+        data: {
+            "win": "win"
+        },
+    }).then(response => console.log("RESPONSE: ", response)
+    ).catch(error => console.log("ERROR: ", error))
+}

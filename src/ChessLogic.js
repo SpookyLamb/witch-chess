@@ -1,5 +1,5 @@
 
-function findKing(white, boardState) {
+export function findKing(white, boardState) {
     //finds a given king's position
 
     let kingToFind
@@ -142,6 +142,37 @@ function checkBlockers(startPosition, endPosition, boardState) {
         console.error("Nonsense data sent to checkBlockers.")
         return true //we count this as blocked
     }
+}
+
+export function checkCaptures(boardState, prevState) {
+    //checks the board state and returns the piece (if any) that was captured in the previous move
+    let cap = ""
+
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            //looking for a piece that has been replaced by the *opposite* color, anything else isn't a capture
+            const curPiece = boardState[i][j]
+            const prevPiece = prevState[i][j]
+            let curColor = ""
+            let prevColor = ""
+
+            if (curPiece) {
+                curColor = curPiece.charAt(0)
+            }
+            if (prevPiece) {
+                prevColor = prevPiece.charAt(0)
+            }
+
+            if (curColor && prevColor) { //pieces in both spots
+                if (curColor !== prevColor) { //captured piece
+                    cap = prevPiece
+                    return cap
+                }
+            }
+        }
+    }
+
+    return cap
 }
 
 export function checkSpecialMoves(boardState, prevState) {
@@ -468,15 +499,12 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                     //need to make sure there's nothing in the pawn's way, they can't jump pieces like the Knight
                     let blockerPiece = boardState[startRow + 1][startCol]
                     if (blockerPiece) {
-                        //console.log("Pawn movement blocked!")
                         return false 
                     } else if (capturing) {
-                        //console.log("Pawns can't capture with their starting movement!")
                         return false
                     }
                     //else, continue...
                 } else {
-                    //console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
                     return false //invalid white pawn move
                 }
             } else if (color === "b") {
@@ -486,15 +514,12 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                     //need to make sure there's nothing in the pawn's way, they can't jump pieces like the Knight
                     let blockerPiece = boardState[startRow - 1][startCol]
                     if (blockerPiece) {
-                        //console.log("Pawn movement blocked!")
                         return false 
                     } else if (capturing) {
-                        //console.log("Pawns can't capture with their starting movement!")
                         return false
                     }
                     //else, continue...
                 } else {
-                    //console.log("Pawns must move FORWARD 1 (sometimes 2) squares!")
                     return false //invalid black pawn move
                 }
             }
@@ -502,19 +527,16 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //if the pawn is moving to an empty square, then we just need to make sure it's staying in it's lane
             if (capturing) { //but if it's moving to an OCCUPIED square...
                 if (startCol === endCol) {
-                    //console.log("Pawns can't capture directly in front of them.")
                     return false 
                 } else if (startCol - 1 === endCol || startCol + 1 === endCol) {
                     //continue...
                 } else {
-                    //console.log("Pawns can't move diagonally more than one square!")
                     return false
                 }
             } else { //stay in your lane
                 if (startCol === endCol) {
                     //continue...
                 } else {
-                    //console.log("Pawns can only move horizontally when capturing!")
                     return false
                 }
             }
@@ -529,18 +551,15 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 if (startRow + 1 === endRow || startRow - 1 === endRow) {
                     //continue...
                 } else {
-                    //console.log("Knights only move in L shapes!")
                     return false
                 }
             } else if (startRow + 2 === endRow || startRow - 2 === endRow) {
                 if (startCol + 1 === endCol || startCol - 1 === endCol) {
                     //continue...
                 } else {
-                    //console.log("Knights only move in L shapes!")
                     return false
                 }
             } else {
-                //console.log("Knights only move in L shapes!")
                 return false
             }
 
@@ -559,7 +578,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             } else if (startRow === endRow && startCol !== endCol) {
                 //continue...
             } else {
-                //console.log("Rooks can only move orthogonally!")
                 return false
             }
 
@@ -568,7 +586,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                //console.log("Rook movement blocked!")
                 return false
             }
 
@@ -578,10 +595,8 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             //bishops move diagonally - they can't end their turn with EITHER the column or row matching their starting position
 
             if (startCol === endCol) {
-                //console.log("Bishops can't move vertically!")
                 return false
             } else if (startRow === endRow ) {
-                //console.log("Bishops can't move horizontally!")
                 return false
             }
 
@@ -602,7 +617,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             }
 
             if (h_shift !== v_shift) {
-                //console.log("Bishops can only move diagonally on a straight line!")
                 return false
             }
 
@@ -612,7 +626,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                //console.log("Bishop movement blocked!")
                 return false
             }
             
@@ -638,7 +651,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 }
     
                 if (h_shift !== v_shift) {
-                    //console.log("Queens can only move diagonally on a straight line!")
                     return false
                 }
             } //else, moving like a rook, which we don't need to double check
@@ -647,7 +659,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
             blocked = checkBlockers(startPosition, endPosition, boardState)
 
             if (blocked) {
-                //console.log("Queen movement blocked!")
                 return false
             }
 
@@ -732,7 +743,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
                 }
 
                 if (!validCastle) { //invalid castle or other illegal move
-                    //console.log("The King can only move one space at a time!")
                     return false
                 }
                 //afterwards, the special move function will notice that a castle happened and move the king/rook accordingly
@@ -759,7 +769,6 @@ export function validateMove(pieceCode, startPosition, endPosition, boardState) 
     let check = validateCheck(white, kingSpace[0], kingSpace[1], copyState)
     
     if (check) {
-        //console.log("You can't let the King be threatened!")
         return false
     }
     
@@ -1060,7 +1069,7 @@ export function validateCheck(white, kingRow, kingCol, boardState) {
     return false
 }
 
-function legalMoves(pieceCode, startPosition, boardState) {
+export function legalMoves(pieceCode, startPosition, boardState) {
     //takes a piece, position, and board, and returns an array of all legal moves (end positions) that it can perform
     let moves = []
 
@@ -1125,10 +1134,258 @@ export function validateWin(white, boardState) {
 
 }
 
-export function validateSpell() { //validates spells, not piece movement
+//used by smite
+function threatenedSquares(pieceCode, startPosition, boardState, white) {
+    //runs the "legalMoves" function on the provided piece, then filters out any moves that don't target an enemy piece
+    //returns the remaining moves, giving all the squares "threatened" by an enemy piece
 
+    const moves = legalMoves(pieceCode, startPosition, boardState)
+    const threat = moves.filter((move) => { //FILTER BEGIN
+        const row = move[0]
+        const col = move[1]
+        const piece = boardState[row][col]
+
+        if (piece) {
+            if (white) {
+                if (piece.includes("b")) {
+                    return true //threat
+                } else {
+                    return false //own piece
+                }
+            } else {
+                if (piece.includes("w")) {
+                    return true //threat
+                } else {
+                    return false //own piece
+                }
+            }
+        } else { //no piece
+            return false
+        }
+    }) //FILTER END
+
+    return threat
 }
 
-export function validSpellcasts() {
+//used by telekinesis
+export function pawnPositions(white, boardState) {
+    let pawns = []
+
+    for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j <= 7; j++) {
+            let piece = boardState[i][j]
+            
+            if (white) {
+                if (piece === "wP" || piece === "wPx") {
+                    pawns.push([i,j])
+                }
+            } else {
+                if (piece === "bP" || piece === "bPx") {
+                    pawns.push([i,j])
+                }
+            }
+        }
+    }
+
+    return pawns
+}
+
+//used by raise dead
+export function graveSpots(white, piece, boardState) {
+    //takes a color, piece, and board state and returns the valid positions a piece can be raised to
+    //skips any spaces that are occupied, can return nothing
+    let graves = []
+    const type = piece.charAt(1)
+
+    let row
+    if (type === "P") {
+        if (white) {
+            row = 2
+        } else {
+            row = 7
+        }
+    } else {
+        if (white) {
+            row = 1
+        } else {
+            row = 8
+        }
+    }
+
+    switch (type) {
+        case "P":
+            //the whole pawn starting row
+            for (let col = 0; col <= 7; col++) {
+                graves.push([row, col])
+            }
+            break;
+        case "B":
+            //columns 2 and 5
+            graves.push([row, 2])
+            graves.push([row, 5])
+            break;
+        case "N":
+            //columns 1 and 6
+            graves.push([row, 1])
+            graves.push([row, 6])
+            break;
+        case "R":
+            //columns 0 and 7
+            graves.push([row, 0])
+            graves.push([row, 7])
+            break;
+        case "Q":
+            //column 3
+            graves.push([row, 3])
+            break;
+        default: //we can skip the king since he should NEVER be captured
+            return []
+    }
+
+    //remove all of the squares that are occupied
+    return graves.filter((position) => {
+        let occupier = boardState[position[0]][position[1]]
+        if (occupier) { //piece present
+            return false
+        } else {
+            return true
+        }
+    })
+}
+
+export function validateSpell(spell, white, data, boardState) {
+    //validates spells, not piece movement
+    //returns true or false, depending on if the spell is valid
+    //note that not all spells need the "data" parameter, and the data it contains can be quite different depending on the spell
+        //smite: takes a targeted square (ex: [X,Y])
+        //time-stop: only needs boardState (no data)
+        //raise-dead: takes a PIECE CODE and a target square (ex: [bQ, [X,Y]])
+        //telekinesis: takes a targeted square (containing a pawn) AND the square the pawn will move to (ex: [[X,Y],[X,Y]])
+
+    switch (spell) {
+        case "smite":
+            //Use your turn to instantly capture an enemy piece threatened by one of your pieces, without moving a piece. Cannot target the King or Queen.
+
+            let targetRow = data[0]
+            let targetCol = data[1]
+            let smitePiece = boardState[targetRow][targetCol]
+
+            let color
+            if (white) {
+                color = "w"
+            } else {
+                color = "b"
+            }
+
+            //first make sure we're actually targeting a piece, and that piece ISN'T a queen or king
+            if (smitePiece) {
+                if (smitePiece.includes("Q") || smitePiece.includes("K") || smitePiece.includes(color)) {
+                    return false //can't target a king, queen, or own piece
+                }
+            } else {
+                return false //can't smite an empty square
+            }
+
+            let threat = []
+
+            //first, using boardState, get a list of all squares (with enemy pieces) "threatened" by at least one piece
+            for (let i = 1; i <= 8; i++) {
+                for (let j = 0; j <= 7; j++) {
+                    let piece = boardState[i][j]
+
+                    if (piece) {
+                        if (piece.includes(color)) { //own piece
+                            let newThreat = threatenedSquares(piece, [i, j], boardState, white)
+                            threat = threat.concat(newThreat)
+                        }
+                    }
+                }
+            }
+
+            let valid = false 
+            //then, check if the provided square in data is in the list
+            for (const move of threat) {
+                if (move[0] === targetRow && move[1] === targetCol) {
+                    valid = true
+                    break;
+                }
+            }
+
+            if (!valid) {
+                return false
+            }
+            
+            //valid smite!
+            break;
+        case "time-stop":
+            //Activate, and then take an extra turn after this one, so long as neither King is in check at the beginning or end of your first turn.
+
+            //time stop is fairly simple, just check if either king is in check - if they aren't, it's a valid time stop and the player can take another turn
+            //the only complication is that this is checked twice -- once when time stop is activated, and again after the first move is made
+            
+
+            break;
+        case "raise-dead":
+            //Use your turn to return one of your captured pieces to a valid starting position (cannot be used on a piece if their position(s) are occupied).
+
+            //first, grab the provided piece code in data
+            //then, check the provided target square against the starting square(s) for that piece
+            //if the target square is a valid starting square for that piece, it's a valid raise dead
+
+            let piece = data[0]
+            let position = data[1]
+            let graves = graveSpots(white, piece, boardState)
+
+            let raise = false
+
+            for (const grave of graves) {
+                if (grave[0] === position[0] && grave[1] === position[1]) {
+                    raise = true
+                }
+            }
+
+            if (!raise) {
+                return false
+            }
+
+            //valid raise dead!
+            break;
+        case "telekinesis":
+            //Instead of moving one of your own pieces, move an opponent’s pawn, following normal movement rules. Cannot capture your own pieces.
+
+            //takes a pawn, which must be an enemy pawn, and the target square
+            //provided that this is a valid move for the pawn (and a pawn WAS selected), it's a valid telekinesis
+
+            //functionality is entirely handled in GameBoard.jsx via bypasses, this code does nothing
+
+            break;
+        default:
+            console.error("BAD SPELL?")
+            return false
+    }
+
+    return true //if we get to this point without throwing a "return false", it's valid
+}
+
+export function validSpellcasts(spell, white, boardState) {
     //takes a spell and the current board state and sends back all the possible valid moves for that spell
+    let moves = []
+
+    switch (spell) {
+        case "smite":
+            for (let row = 1; row <= 8; row++) {
+                for (let col = 0; col <= 7; col++) {
+                    let valid = validateSpell(spell, white, [row, col], boardState)
+        
+                    if (valid) {
+                        moves.push([row, col])
+                    }
+                }
+            }
+            break;
+        default:
+            return []
+    }
+
+    return moves
 }

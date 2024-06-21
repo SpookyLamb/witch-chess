@@ -21,10 +21,8 @@ const checkToken = ({ auth, setPageData }) => {
           Authorization: `Bearer ${auth.accessToken}`
       },
   }).then(response => {
-      console.log('CHECK TOKEN RESPONSE: ', response)
       setPageData(<Game/>)
   }).catch(error => {
-      console.log("ERROR: ", error)
       setPageData(<Login />)
   })
 }
@@ -38,7 +36,7 @@ function App() {
   }, [auth.accessToken])
 
   return (
-      <div className="p-4">
+      <div className="py-2">
         {pageData}
       </div>
   )
