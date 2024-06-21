@@ -1150,6 +1150,16 @@ function Board(props) {
         bottomTime = formatSeconds(whiteTime)
     }
 
+    let spellColor //for file paths
+    let enemySpellColor
+    if (clientColor === "Black") {
+        spellColor = "black"
+        enemySpellColor = "white"
+    } else {
+        spellColor = "white"
+        enemySpellColor = "black"
+    }
+
     return (
         <div>
             {popUp}
@@ -1158,10 +1168,10 @@ function Board(props) {
                     <WinTracker whiteWins={whiteWins} blackWins={blackWins} />
                 </Row>
                 <Row className="d-flex justify-content-center py-1">
-                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" usedSpells={enemyUsedSpells} disabled={true}/>
-                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" usedSpells={enemyUsedSpells} disabled={true}/>
-                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" usedSpells={enemyUsedSpells} disabled={true}/>
-                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/${enemySpellColor}-smite.png`} spell="smite" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/${enemySpellColor}-time-stop.png`} spell="time-stop" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/${enemySpellColor}-raise-dead.png`} spell="raise-dead" usedSpells={enemyUsedSpells} disabled={true}/>
+                    <SpellButton src={`${imgUrl}/${enemySpellColor}-telekinesis.png`} spell="telekinesis" usedSpells={enemyUsedSpells} disabled={true}/>
                 </Row>
                 <Row>
                     <Col id="black-captures" className="pb-2">
@@ -1205,10 +1215,10 @@ function Board(props) {
                     </Col>
                 </Row>
                 <Row className="d-flex justify-content-center py-1">
-                    <SpellButton src={`${imgUrl}/smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
-                    <SpellButton src={`${imgUrl}/telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-smite.png`} spell="smite" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-time-stop.png`} spell="time-stop" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-raise-dead.png`} spell="raise-dead" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
+                    <SpellButton src={`${imgUrl}/${spellColor}-telekinesis.png`} spell="telekinesis" activateSpell={activateSpell} usedSpells={usedSpells} disabled={false}/>
                 </Row>
                 <Row><Col className="text-center pt-2 text-white poppins-light">{turnDisplay}</Col></Row>
             </Container>
