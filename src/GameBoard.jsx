@@ -475,7 +475,7 @@ function Board(props) {
     const [blackTime, setBlackTime] = useState(180) //these times are PURELY VISUAL and not the actual time being tracked, because React :/
 
     const [turn, setTurn] = useState("White")
-    const [clientColor, setClientColor] = useState("Spectator")
+    const [clientColor, setClientColor] = useState("None")
 
     const [validMoves, setValidMoves] = useState([])
 
@@ -512,6 +512,12 @@ function Board(props) {
                         colorTracker = object.color
                         break;
                     case "gamestate": //recieves new gamestate from the other player
+
+                        if (!object.message) {
+                            //ignores bad game states, like null or empty strings
+                            return
+                        }
+
                         //check for captures
                         const cap = checkCaptures(object.message, lastState)
                         
@@ -1140,9 +1146,9 @@ function Board(props) {
             } else {
                 turnDisplay = (<div>Your turn.</div>)
             }
-        } else { //spectator
-            turnDisplay = (<div>{turn} to move.</div>)
         }
+    } else if (clientColor === "Spectate") {
+        turnDisplay = "Spectating..."
     } else {
         turnDisplay = "Waiting for another player to join..."
     }
