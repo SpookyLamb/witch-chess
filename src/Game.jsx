@@ -16,7 +16,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import Board from "./GameBoard"
 
 import { AuthContext } from "./authContext"
-import { fetchLobbies } from "./api"
+import { fetchLobbies, getWins } from "./api"
 
 import { v4 as uuidv4 } from "uuid"
 
@@ -72,7 +72,7 @@ function LobbyInput(props) {
     }
 
     return (
-        <Container className="py-5">
+        <Container className="pb-5 pt-1">
             <h3 className="py-2 text-center text-white">Create/Join A Lobby</h3>
             <Col className="text-center text-white d-flex justify-content-center">
                 
@@ -199,6 +199,13 @@ function RefreshButton(props) {
 export function Lobby(props) {
     const setElement = props.setElement
     const [rulesVisible, setRulesVisible] = useState(false)
+    
+    const { auth } = useContext(AuthContext)
+    const [wins, setWins] = useState(0)
+
+    useEffect(() => {
+        getWins({auth, setWins})
+    }, [])
 
     let rules
     if (rulesVisible) {
@@ -211,6 +218,7 @@ export function Lobby(props) {
         <div>
             {rules}
             <Title/>
+            <h4 className="text-center text-white py-4">Your Wins: {wins}</h4>
             <LobbyInput setElement={setElement}/>
             <RulesButton setRulesVisible={setRulesVisible}/>
             <LobbyList setElement={setElement}/>

@@ -80,3 +80,29 @@ export const fetchLobbies = ({ auth, setLobbies }) => {
         setLobbies(response.data)
     }).catch(error => console.log("ERROR: ", error))
 }
+
+export const getWins = ({auth, setWins}) => {
+    axios({
+        method: 'get',
+        url: `${baseUrl}/get-win/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+    }).then(response => {
+        setWins(response.data)
+    }).catch(error => console.log("ERROR: ", error))
+}
+
+export const addWin = ({auth}) => {
+    axios({
+        method: 'post',
+        url: `${baseUrl}/add-win/`,
+        headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+        },
+        data: {
+            "win": "win"
+        },
+    }).then(response => console.log("RESPONSE: ", response)
+    ).catch(error => console.log("ERROR: ", error))
+}

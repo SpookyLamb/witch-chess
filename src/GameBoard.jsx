@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { useEffect } from "react"
 
 import Container from "react-bootstrap/Container"
@@ -14,8 +14,9 @@ import { checkSpecialMoves, validateMove, validateWin, checkCaptures, legalMoves
 import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
-import { debug } from "./api"
+import { addWin, debug } from "./api"
 import { Lobby } from "./Game"
+import { AuthContext } from "./authContext"
 
 let imgUrl = "assets"
 
@@ -500,6 +501,8 @@ function Board(props) {
     const lobbyPrivate = props.lobbyPrivate
     const setElement = props.setElement
 
+    const { auth } = useContext(AuthContext)
+
     //websocket
     useEffect( () => {
         clientRef = createClient(lobby, lobbyPrivate)
@@ -589,6 +592,7 @@ function Board(props) {
                     case "victory":
                         if (object.color === colorTracker) {
                             doPopUp("VICTORY")
+                            addWin({auth})
                             queuedFunctions.push(returnToLobby)
                         } else { //also happens when a total draw occurs
                             doPopUp("DEFEAT")

@@ -273,6 +273,10 @@ p {
   font-style: normal;
 }
 
+.underline {
+  text-decoration: underline;
+}
+
 .charm-regular {
   font-family: "Charm", cursive;
   font-weight: 400;
