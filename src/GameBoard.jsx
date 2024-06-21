@@ -545,16 +545,9 @@ function Board(props) {
                         break;
                     case "gamestart": //informs players that the game can start
                         setCanPlay(object.message)
-
-                        clientRef.send( //echo back to let the server know the message was recieved
-                            JSON.stringify({
-                                "dispatch": "echo-gamestart",
-                                'message': "",
-                                'turn': "",
-                            })
-                        )
-
                         doPopUp("Let the game begin!")
+                        echoGameStart()
+                        queuedFunctions.push(echoTimer)
                         break;
                     case "disconnect": //tells the remaining players that a player has disconnected
                         if (object.message !== "Spectate") { //we don't care when spectators leave
@@ -590,15 +583,8 @@ function Board(props) {
                         //reset and begin a new round
                         resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells)
                         doPopUp("The true victor is still undecided. Another round!")
-
-                        clientRef.send( //echo back to let the server know the message was recieved
-                            JSON.stringify({
-                                "dispatch": "echo-nextround",
-                                'message': "",
-                                'turn': "",
-                            })
-                        )
-
+                        echoNextRound()
+                        queuedFunctions.push(echoTimer)
                         break;
                     case "victory":
                         if (object.color === colorTracker) {
@@ -624,9 +610,40 @@ function Board(props) {
         };
     }, [])
 
+    //socket queued functions
     function returnToLobby() { //boots the player back to the lobby screen
         clientRef.close(1000)
         setElement(<Lobby setElement={setElement}/>)
+    }
+
+    function echoGameStart() {
+        clientRef.send( //echo back to let the server know the message was recieved
+            JSON.stringify({
+                "dispatch": "echo-gamestart",
+                'message': "",
+                'turn': "",
+            })
+        )
+    }
+
+    function echoNextRound() {
+        clientRef.send( //echo back to let the server know the message was recieved
+        JSON.stringify({
+            "dispatch": "echo-nextround",
+            'message': "",
+            'turn': "",
+        })
+    )
+    }
+
+    function echoTimer() {
+        clientRef.send( //echo back to let the server know it can start the timers
+        JSON.stringify({
+            "dispatch": "echo-timer",
+            'message': "",
+            'turn': "",
+        })
+    )
     }
 
     //SPELLS
