@@ -65,7 +65,7 @@ function LobbyInput(props) {
 
     function submit() {
         if (lobbyCode) {
-            setElement(<Board lobby={lobbyCode} lobbyPrivate={lobbyPrivate}/>)
+            setElement(<Board lobby={lobbyCode} lobbyPrivate={lobbyPrivate} setElement={setElement}/>)
         } else {
             alert("Please enter a name for your lobby!")
         }
@@ -134,7 +134,7 @@ function LobbyList(props) {
     function join(lobbyCode) {
         //join the provided lobby
         if (lobbyCode) {
-            setElement(<Board lobby={lobbyCode} />)
+            setElement(<Board lobby={lobbyCode} lobbyPrivate={false} setElement={setElement}/>)
         }
     }
 
@@ -196,7 +196,7 @@ function RefreshButton(props) {
     )
 }
 
-function Lobby(props) {
+export function Lobby(props) {
     const setElement = props.setElement
     const [rulesVisible, setRulesVisible] = useState(false)
 

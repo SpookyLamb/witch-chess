@@ -15,6 +15,7 @@ import { createClient } from "./websocket"
 import { formatSeconds, tick } from "./utility"
 
 import { debug } from "./api"
+import { Lobby } from "./Game"
 
 let imgUrl = "assets"
 
@@ -85,6 +86,8 @@ let whiteWinnings = 0; //REACT!!!
 let blackWinnings = 0;
 
 let enemySpells = [] //tracks enemy spells for the websocket
+
+let queuedFunctions = []
 
 function announceWin(winner) {
     if (decision) {
@@ -495,6 +498,7 @@ function Board(props) {
     //lobby props
     const lobby = props.lobby
     const lobbyPrivate = props.lobbyPrivate
+    const setElement = props.setElement
 
     //websocket
     useEffect( () => {
@@ -556,6 +560,7 @@ function Board(props) {
                         if (object.message !== "Spectate") { //we don't care when spectators leave
                             if (object.message !== clientColor) {
                                 doPopUp("Your opponent has left the game!")
+                                queuedFunctions.push(returnToLobby)
                             }
                         }
                         break;
@@ -598,8 +603,10 @@ function Board(props) {
                     case "victory":
                         if (object.color === colorTracker) {
                             doPopUp("VICTORY")
+                            queuedFunctions.push(returnToLobby)
                         } else { //also happens when a total draw occurs
                             doPopUp("DEFEAT")
+                            queuedFunctions.push(returnToLobby)
                         }
                         
                         break;
@@ -616,6 +623,11 @@ function Board(props) {
             }
         };
     }, [])
+
+    function returnToLobby() { //boots the player back to the lobby screen
+        clientRef.close(1000)
+        setElement(<Lobby setElement={setElement}/>)
+    }
 
     //SPELLS
 
@@ -738,6 +750,9 @@ function Board(props) {
     } else if (queuedPopText) {
         doPopUp(queuedPopText)
         setQueuedPopText("")
+    } else if (queuedFunctions.length > 0) {
+        const func = queuedFunctions.pop()
+        func()
     } else {
         popUp = (<></>)
     }
