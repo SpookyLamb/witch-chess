@@ -86,6 +86,9 @@ let colorTracker = "Spectate"; // >:(
 let whiteWinnings = 0; //REACT!!!
 let blackWinnings = 0;
 
+let whiteCaps = []; //AAAAAAAAAAAAAA!!
+let blackCaps = [];
+
 let enemySpells = [] //tracks enemy spells for the websocket
 
 let queuedFunctions = []
@@ -139,6 +142,9 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setWhiteCaptures([])
     setBlackCaptures([])
+
+    whiteCaps = []
+    blackCaps = []
 
     setActiveSpell("")
     setUsedSpells([])
@@ -529,13 +535,11 @@ function Board(props) {
                         
                         if (cap) {
                             if (cap.startsWith("w")) { //white piece captured by black
-                                let captures = blackCaptures
-                                captures.push(cap)
-                                setBlackCaptures(captures)
+                                blackCaps.push(cap)
+                                setBlackCaptures(blackCaps)
                             } else { //black piece captured by white
-                                let captures = whiteCaptures
-                                captures.push(cap)
-                                setWhiteCaptures(captures)
+                                whiteCaps.push(cap)
+                                setWhiteCaptures(whiteCaps)
                             }
                         }
 
@@ -883,15 +887,12 @@ function Board(props) {
                         }
 
                         //remove from captured pieces
-                        let copy
                         if (clientColor === "White") {
-                            copy = Array.from(blackCaptures)
-                            copy.splice(copy.indexOf(undeadPiece), 1)
-                            setBlackCaptures(copy)
+                            blackCaps.splice(blackCaps.indexOf(undeadPiece), 1)
+                            setBlackCaptures(blackCaps)
                         } else {
-                            copy = Array.from(whiteCaptures)
-                            copy.splice(copy.indexOf(undeadPiece), 1)
-                            setWhiteCaptures(copy)
+                            whiteCaps.splice(whiteCaps.indexOf(undeadPiece), 1)
+                            setWhiteCaptures(whiteCaps)
                         }
 
                         //set the new state, by sending it via our socket and getting it echoed back
@@ -965,26 +966,26 @@ function Board(props) {
                     //handle captures
                     let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
                     
-                    let captures
-                    if (turn === "White") {
-                        captures = Array.from(whiteCaptures)
-                    } else {
-                        captures = Array.from(blackCaptures)
-                    }
+                    // let captures
+                    // if (turn === "White") {
+                    //     captures = whiteCaps
+                    // } else {
+                    //     captures = blackCaps
+                    // }
 
-                    if (capturedPiece) { //piece captured
-                        if (turn === "White") {
-                            if (capturedPiece !== "wR") {
-                                captures.push(capturedPiece)
-                                setWhiteCaptures(captures)
-                            }
-                        } else {
-                            if (capturedPiece !== "bR") {
-                                captures.push(capturedPiece)
-                                setBlackCaptures(captures)
-                            }
-                        }
-                    }
+                    // if (capturedPiece) { //piece captured
+                    //     if (turn === "White") {
+                    //         if (capturedPiece !== "wR") {
+                    //             captures.push(capturedPiece)
+                    //             setWhiteCaptures(captures)
+                    //         }
+                    //     } else {
+                    //         if (capturedPiece !== "bR") {
+                    //             captures.push(capturedPiece)
+                    //             setBlackCaptures(captures)
+                    //         }
+                    //     }
+                    // }
 
                     //place the piece in its new position
                     copyState[row][column] = activePiece
@@ -998,15 +999,15 @@ function Board(props) {
                     let flank = result[1]
 
                     //handle flanked pieces from en passant
-                    if (flank) {
-                        if (turn === "White") {
-                            captures.push(flank)
-                            setWhiteCaptures(captures)
-                        } else {
-                            captures.push(flank)
-                            setBlackCaptures(captures)
-                        }
-                    }
+                    // if (flank) {
+                    //     if (turn === "White") {
+                    //         captures.push(flank)
+                    //         setWhiteCaptures(captures)
+                    //     } else {
+                    //         captures.push(flank)
+                    //         setBlackCaptures(captures)
+                    //     }
+                    // }
 
                     let newTurn 
                     if (turn === "White") {
