@@ -358,6 +358,18 @@ function PopUp(props) {
     )
 }
 
+function Timer(props) {
+    let time = props.time
+
+    return (
+        <div className="timer mx-auto">
+            <div className="time-text text-center d-flex justify-content-center">
+                {formatSeconds(time)}
+            </div>
+        </div>
+    )
+}
+
 function Square(props) {
     //game square, an 8x8 grid of 64 of these makes up the whole game board
     //each square has a given row (numbered 1-8) and column (lettered A-H)
@@ -1214,11 +1226,7 @@ function Board(props) {
                     <Col id="black-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
-                                <div className="timer mx-auto">
-                                    <div className="time-text text-center d-flex justify-content-center">
-                                        {formatSeconds(blackTime)}
-                                    </div>
-                                </div>
+                                <Timer time={blackTime} key={uuidv4()}/>
                             </Col>
                             <Col className="col-10 col-lg-12 captures-col">
                                 <Row>
@@ -1237,11 +1245,7 @@ function Board(props) {
                     <Col id="white-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center flex-row-reverse">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
-                                <div className="timer mx-auto">
-                                    <div className="time-text text-center d-flex justify-content-center">
-                                        {formatSeconds(whiteTime)}
-                                    </div>
-                                </div>
+                                <Timer time={whiteTime} key={uuidv4()} />
                             </Col>
                             <Col className="col-10 col-lg-12 captures-col">
                                 <Row>
