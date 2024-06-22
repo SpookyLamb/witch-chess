@@ -86,6 +86,9 @@ let colorTracker = "Spectate"; // >:(
 let whiteWinnings = 0; //REACT!!!
 let blackWinnings = 0;
 
+let whiteCaps = []; //AAAAAAAAAAAAAA!!
+let blackCaps = [];
+
 let enemySpells = [] //tracks enemy spells for the websocket
 
 let queuedFunctions = []
@@ -139,6 +142,9 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setWhiteCaptures([])
     setBlackCaptures([])
+
+    whiteCaps = []
+    blackCaps = []
 
     setActiveSpell("")
     setUsedSpells([])
@@ -352,6 +358,18 @@ function PopUp(props) {
     )
 }
 
+function Timer(props) {
+    let time = props.time
+
+    return (
+        <div className="timer mx-auto">
+            <div className="time-text text-center d-flex justify-content-center">
+                {formatSeconds(time)}
+            </div>
+        </div>
+    )
+}
+
 function Square(props) {
     //game square, an 8x8 grid of 64 of these makes up the whole game board
     //each square has a given row (numbered 1-8) and column (lettered A-H)
@@ -529,13 +547,11 @@ function Board(props) {
                         
                         if (cap) {
                             if (cap.startsWith("w")) { //white piece captured by black
-                                let captures = blackCaptures
-                                captures.push(cap)
-                                setBlackCaptures(captures)
+                                blackCaps.push(cap)
+                                setBlackCaptures(blackCaps)
                             } else { //black piece captured by white
-                                let captures = whiteCaptures
-                                captures.push(cap)
-                                setWhiteCaptures(captures)
+                                whiteCaps.push(cap)
+                                setWhiteCaptures(whiteCaps)
                             }
                         }
 
@@ -883,15 +899,12 @@ function Board(props) {
                         }
 
                         //remove from captured pieces
-                        let copy
                         if (clientColor === "White") {
-                            copy = Array.from(blackCaptures)
-                            copy.splice(copy.indexOf(undeadPiece), 1)
-                            setBlackCaptures(copy)
+                            blackCaps.splice(blackCaps.indexOf(undeadPiece), 1)
+                            setBlackCaptures(blackCaps)
                         } else {
-                            copy = Array.from(whiteCaptures)
-                            copy.splice(copy.indexOf(undeadPiece), 1)
-                            setWhiteCaptures(copy)
+                            whiteCaps.splice(whiteCaps.indexOf(undeadPiece), 1)
+                            setWhiteCaptures(whiteCaps)
                         }
 
                         //set the new state, by sending it via our socket and getting it echoed back
@@ -965,26 +978,26 @@ function Board(props) {
                     //handle captures
                     let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
                     
-                    let captures
-                    if (turn === "White") {
-                        captures = Array.from(whiteCaptures)
-                    } else {
-                        captures = Array.from(blackCaptures)
-                    }
+                    // let captures
+                    // if (turn === "White") {
+                    //     captures = whiteCaps
+                    // } else {
+                    //     captures = blackCaps
+                    // }
 
-                    if (capturedPiece) { //piece captured
-                        if (turn === "White") {
-                            if (capturedPiece !== "wR") {
-                                captures.push(capturedPiece)
-                                setWhiteCaptures(captures)
-                            }
-                        } else {
-                            if (capturedPiece !== "bR") {
-                                captures.push(capturedPiece)
-                                setBlackCaptures(captures)
-                            }
-                        }
-                    }
+                    // if (capturedPiece) { //piece captured
+                    //     if (turn === "White") {
+                    //         if (capturedPiece !== "wR") {
+                    //             captures.push(capturedPiece)
+                    //             setWhiteCaptures(captures)
+                    //         }
+                    //     } else {
+                    //         if (capturedPiece !== "bR") {
+                    //             captures.push(capturedPiece)
+                    //             setBlackCaptures(captures)
+                    //         }
+                    //     }
+                    // }
 
                     //place the piece in its new position
                     copyState[row][column] = activePiece
@@ -998,15 +1011,15 @@ function Board(props) {
                     let flank = result[1]
 
                     //handle flanked pieces from en passant
-                    if (flank) {
-                        if (turn === "White") {
-                            captures.push(flank)
-                            setWhiteCaptures(captures)
-                        } else {
-                            captures.push(flank)
-                            setBlackCaptures(captures)
-                        }
-                    }
+                    // if (flank) {
+                    //     if (turn === "White") {
+                    //         captures.push(flank)
+                    //         setWhiteCaptures(captures)
+                    //     } else {
+                    //         captures.push(flank)
+                    //         setBlackCaptures(captures)
+                    //     }
+                    // }
 
                     let newTurn 
                     if (turn === "White") {
@@ -1213,11 +1226,7 @@ function Board(props) {
                     <Col id="black-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
-                                <div className="timer mx-auto">
-                                    <div className="time-text text-center d-flex justify-content-center">
-                                        {formatSeconds(blackTime)}
-                                    </div>
-                                </div>
+                                <Timer time={blackTime} key={uuidv4()}/>
                             </Col>
                             <Col className="col-10 col-lg-12 captures-col">
                                 <Row>
@@ -1236,11 +1245,7 @@ function Board(props) {
                     <Col id="white-captures" className="pb-2">
                         <Row className="d-flex justify-content-center text-center flex-row-reverse">
                             <Col className="col-2 col-lg-12 px-0 align-self-start">
-                                <div className="timer mx-auto">
-                                    <div className="time-text text-center d-flex justify-content-center">
-                                        {formatSeconds(whiteTime)}
-                                    </div>
-                                </div>
+                                <Timer time={whiteTime} key={uuidv4()} />
                             </Col>
                             <Col className="col-10 col-lg-12 captures-col">
                                 <Row>
