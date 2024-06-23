@@ -380,6 +380,7 @@ function Square(props) {
     const squareClicked = props.squareClicked
     const clientColor = props.clientColor
     const valid = props.valid
+    const checked = props.checked
 
     //these squares need to respond to click input and inform the board, which does the actual logical heavy lifting on if that clicks means anything
     let displayPiece
@@ -443,6 +444,8 @@ function Square(props) {
     //finally, calculate whether or not this particular square should be a white or black square, or a "valid" square
     if (valid) {
         colorClass = "valid-square"
+    } else if (checked) {
+        colorClass = "checked-square"
     } else if (row % 2 === 0) { //even row
         if ((col + 1) % 2 === 0) { //even row, even col = black
             colorClass = "black-square"
@@ -1080,6 +1083,13 @@ function Board(props) {
         //by default, draws as though the player is white
         //this only affects the visuals - gameplay and calculations are identical regardless
 
+        //check for check
+        let whiteKing = findKing(true, boardState)
+        let blackKing = findKing(false, boardState)
+
+        let whiteInCheck = validateCheck(true, whiteKing[0], whiteKing[1], boardState)
+        let blackInCheck = validateCheck(false, blackKing[0], blackKing[1], boardState)
+
         for (let i = 1; i <= 8; i++) { //row loop
             for (let j = 7; j >= 0; j--) { //column loop
 
@@ -1090,6 +1100,19 @@ function Board(props) {
                     } 
                 }
 
+                let checked = false
+                if (whiteInCheck) {
+                    if (whiteKing[0] === i && whiteKing[1] === j) { //white king checked and on this square
+                        checked = true
+                    }
+                }
+
+                if (blackInCheck) {
+                    if (blackKing[0] === i && blackKing[1] === j) {
+                        checked = true
+                    }
+                }
+
                 boardElements.push(
                     <Square
                         row={i}
@@ -1098,6 +1121,7 @@ function Board(props) {
                         piece={newBoardState[i][j]}
                         squareClicked={squareClicked}
                         clientColor={clientColor}
+                        checked={checked}
                         key={uuidv4()}
                     />
                 )
