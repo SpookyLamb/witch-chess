@@ -710,15 +710,9 @@ function Board(props) {
 
         if (activeSpell === "raise-dead") {
             if (piece.startsWith("w") && clientColor === "White") {
-                // if (piece === "wPx") {
-                //     piece = "wP"
-                // }
                 undeadPiece = piece
                 setValidMoves(graveSpots(true, piece, boardState))
             } else if (piece.startsWith("b") && clientColor === "Black") {
-                // if (piece === "bPx") {
-                //     piece = "bP"
-                // }
                 undeadPiece = piece
                 setValidMoves(graveSpots(false, piece, boardState))
             }
@@ -978,29 +972,6 @@ function Board(props) {
 
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
-                    //handle captures
-                    let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
-                    
-                    // let captures
-                    // if (turn === "White") {
-                    //     captures = whiteCaps
-                    // } else {
-                    //     captures = blackCaps
-                    // }
-
-                    // if (capturedPiece) { //piece captured
-                    //     if (turn === "White") {
-                    //         if (capturedPiece !== "wR") {
-                    //             captures.push(capturedPiece)
-                    //             setWhiteCaptures(captures)
-                    //         }
-                    //     } else {
-                    //         if (capturedPiece !== "bR") {
-                    //             captures.push(capturedPiece)
-                    //             setBlackCaptures(captures)
-                    //         }
-                    //     }
-                    // }
 
                     //place the piece in its new position
                     copyState[row][column] = activePiece
@@ -1012,17 +983,6 @@ function Board(props) {
                     let result = checkSpecialMoves(copyState, boardState) //returns a two element array with the new board state and any flanked pawns
                     let newState = result[0]
                     let flank = result[1]
-
-                    //handle flanked pieces from en passant
-                    // if (flank) {
-                    //     if (turn === "White") {
-                    //         captures.push(flank)
-                    //         setWhiteCaptures(captures)
-                    //     } else {
-                    //         captures.push(flank)
-                    //         setBlackCaptures(captures)
-                    //     }
-                    // }
 
                     let newTurn 
                     if (turn === "White") {
@@ -1211,9 +1171,6 @@ function Board(props) {
     } else {
         turnDisplay = "Waiting for another player to join..."
     }
-
-    let topTime
-    let bottomTime
 
     if (clientColor === "Black") {
         topTime = formatSeconds(whiteTime)
