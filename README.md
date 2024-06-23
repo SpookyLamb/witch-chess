@@ -11,8 +11,9 @@ The backend repository can be found here: https://github.com/SpookyLamb/witch-ch
 * $ `nvm use 20`
 * $ `npm install`
 * $ `npm run dev`
+* See the Backend repository for further instructions.
 
 ## Build & Deployment
 * $ `npm run build`
 * Deploys to "Dist"
-* See the Backend repository for further instructions.
+* Requires a functional backend (local or deployed) to work.
