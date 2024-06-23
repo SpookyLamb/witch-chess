@@ -11,6 +11,11 @@ if (wsBaseUrl === '127.0.0.1:8000') {
 
 export function createClient(lobby_code, lobbyPrivate) {
 
+    //remove any funky characters
+    lobby_code = lobby_code.replaceAll(' ', "")
+    lobby_code = lobby_code.replaceAll('-', "")
+    lobby_code = lobby_code.replaceAll('_', "")
+
     const client = new W3CWebSocket(`${socket}://${wsBaseUrl}/ws/game/` + lobby_code + '/');
 
     client.onerror = function() {
