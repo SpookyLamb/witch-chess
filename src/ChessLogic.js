@@ -1322,7 +1322,6 @@ export function validateSpell(spell, white, data, boardState) {
 
             //time stop is fairly simple, just check if either king is in check - if they aren't, it's a valid time stop and the player can take another turn
             //the only complication is that this is checked twice -- once when time stop is activated, and again after the first move is made
-            
 
             break;
         case "raise-dead":
