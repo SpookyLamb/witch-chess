@@ -681,6 +681,7 @@ function Board(props) {
         if (spell === activeSpell) { //double click, cancel
             setActiveSpell("")
             setValidMoves([])
+            activeSquare = [0,0]
             return
         }
 
