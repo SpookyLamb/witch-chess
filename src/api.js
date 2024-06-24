@@ -31,7 +31,6 @@ export const createUser = ({username, password, email}) => {
             email,
         }
     }).then(response => {
-        console.log("CREATE USER RESPONSE: ", response)
         if (response.status === 200 || response.status === 201 || response.status === 202) {
             alert("Account created successfully! Please log in.")
         } else {
@@ -62,7 +61,6 @@ export const fetchUser = ({ auth }) => {
             Authorization: `Bearer ${auth.accessToken}`
         },
     }).then(response => {
-        console.log('FETCH USER RESPONSE: ', response)
     }).catch(error => console.log("ERROR: ", error))
 }
 
@@ -100,6 +98,6 @@ export const addWin = ({auth}) => {
         data: {
             "win": "win"
         },
-    }).then(response => console.log("RESPONSE: ", response)
+    }).then(response => {}
     ).catch(error => console.log("ERROR: ", error))
 }

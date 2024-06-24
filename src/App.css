@@ -1,9 +1,9 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
   --game-board-size: 87.5vw; /* 800px */
-  --game-board-max: 63vh;
+  --game-board-max: 608px; /* 63vh */
   --board-background-size: 100vw;
-  --board-background-max: 72vh;
+  --board-background-max: 696px; /* 72vh */
   --timer-size: 15vw;
   --timer-max: 12vh;
   --spell-max: 12vh;
@@ -123,7 +123,7 @@ body {
 }
 
 .enemy-spell {
-  max-width: calc(var(--spell-max) / 2);
+  max-width: calc(var(--spell-max) / 1.5);
   max-height: calc(var(--spell-max) / 2);
 }
 

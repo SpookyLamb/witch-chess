@@ -20,10 +20,6 @@ import { AuthContext } from "./authContext"
 
 let imgUrl = "src/assets"
 
-// if (debug) {
-//     imgUrl = "src/assets"
-// }
-
 //pictures
 const imageSources = {
     gameBoard: `${imgUrl}/chess-board.png`,
@@ -112,7 +108,7 @@ function announceWin(winner) {
     )
 }
 
-function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells) {
+function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells, setEnemyUsedSpells) {
     //reset the board
     setBoardState({
         8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -148,6 +144,9 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setActiveSpell("")
     setUsedSpells([])
+
+    enemySpells = []
+    setEnemyUsedSpells([])
 
     decision = false
 }
@@ -529,7 +528,6 @@ function Board(props) {
 
         clientRef.onmessage = (e) => {
             if (typeof e.data === 'string') {
-                //console.log("Received: ", e.data);
 
                 let object = JSON.parse(e.data)
 
@@ -602,7 +600,8 @@ function Board(props) {
                         break;
                     case "next-round":
                         //reset and begin a new round
-                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells)
+                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, 
+                            setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells, setEnemyUsedSpells)
                         doPopUp("The true victor is still undecided. Another round!")
                         echoNextRound()
                         queuedFunctions.push(echoTimer)
@@ -682,6 +681,7 @@ function Board(props) {
         if (spell === activeSpell) { //double click, cancel
             setActiveSpell("")
             setValidMoves([])
+            activeSquare = [0,0]
             return
         }
 
@@ -710,15 +710,9 @@ function Board(props) {
 
         if (activeSpell === "raise-dead") {
             if (piece.startsWith("w") && clientColor === "White") {
-                // if (piece === "wPx") {
-                //     piece = "wP"
-                // }
                 undeadPiece = piece
                 setValidMoves(graveSpots(true, piece, boardState))
             } else if (piece.startsWith("b") && clientColor === "Black") {
-                // if (piece === "bPx") {
-                //     piece = "bP"
-                // }
                 undeadPiece = piece
                 setValidMoves(graveSpots(false, piece, boardState))
             }
@@ -978,29 +972,6 @@ function Board(props) {
 
                 if (valid) {
                     //"move" the piece (place it in the new position), noting captures (the piece that was there, if it wasn't empty)
-                    //handle captures
-                    let capturedPiece = copyState[row][column] //note the piece that was previously in that spot
-                    
-                    // let captures
-                    // if (turn === "White") {
-                    //     captures = whiteCaps
-                    // } else {
-                    //     captures = blackCaps
-                    // }
-
-                    // if (capturedPiece) { //piece captured
-                    //     if (turn === "White") {
-                    //         if (capturedPiece !== "wR") {
-                    //             captures.push(capturedPiece)
-                    //             setWhiteCaptures(captures)
-                    //         }
-                    //     } else {
-                    //         if (capturedPiece !== "bR") {
-                    //             captures.push(capturedPiece)
-                    //             setBlackCaptures(captures)
-                    //         }
-                    //     }
-                    // }
 
                     //place the piece in its new position
                     copyState[row][column] = activePiece
@@ -1012,17 +983,6 @@ function Board(props) {
                     let result = checkSpecialMoves(copyState, boardState) //returns a two element array with the new board state and any flanked pawns
                     let newState = result[0]
                     let flank = result[1]
-
-                    //handle flanked pieces from en passant
-                    // if (flank) {
-                    //     if (turn === "White") {
-                    //         captures.push(flank)
-                    //         setWhiteCaptures(captures)
-                    //     } else {
-                    //         captures.push(flank)
-                    //         setBlackCaptures(captures)
-                    //     }
-                    // }
 
                     let newTurn 
                     if (turn === "White") {
