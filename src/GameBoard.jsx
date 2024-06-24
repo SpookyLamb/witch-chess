@@ -20,10 +20,6 @@ import { AuthContext } from "./authContext"
 
 let imgUrl = "src/assets"
 
-// if (debug) {
-//     imgUrl = "src/assets"
-// }
-
 //pictures
 const imageSources = {
     gameBoard: `${imgUrl}/chess-board.png`,
