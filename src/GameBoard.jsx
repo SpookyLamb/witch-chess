@@ -108,7 +108,7 @@ function announceWin(winner) {
     )
 }
 
-function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells) {
+function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells, setEnemyUsedSpells) {
     //reset the board
     setBoardState({
         8: ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
@@ -144,6 +144,9 @@ function resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhite
 
     setActiveSpell("")
     setUsedSpells([])
+
+    enemySpells = []
+    setEnemyUsedSpells([])
 
     decision = false
 }
@@ -525,7 +528,6 @@ function Board(props) {
 
         clientRef.onmessage = (e) => {
             if (typeof e.data === 'string') {
-                //console.log("Received: ", e.data);
 
                 let object = JSON.parse(e.data)
 
@@ -598,7 +600,8 @@ function Board(props) {
                         break;
                     case "next-round":
                         //reset and begin a new round
-                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells)
+                        resetBoard(setBoardState, setTurn, setWhiteTime, setBlackTime, 
+                            setWhiteCaptures, setBlackCaptures, setActiveSpell, setUsedSpells, setEnemyUsedSpells)
                         doPopUp("The true victor is still undecided. Another round!")
                         echoNextRound()
                         queuedFunctions.push(echoTimer)
@@ -1167,6 +1170,9 @@ function Board(props) {
     } else {
         turnDisplay = "Waiting for another player to join..."
     }
+
+    let topTime
+    let bottomTime
 
     if (clientColor === "Black") {
         topTime = formatSeconds(whiteTime)
