@@ -993,15 +993,16 @@ function Board(props) {
 
                     //ZA WARUDO - handle time stop
                     if (activeSpell === "time-stop") {
-                        let whiteKing = findKing(true, boardState)
-                        let blackKing = findKing(false, boardState)
+                        let whiteKing = findKing(true, newState)
+                        let blackKing = findKing(false, newState)
     
-                        let whiteInCheck = validateCheck(true, whiteKing[0], whiteKing[1], boardState)
-                        let blackInCheck = validateCheck(false, blackKing[0], blackKing[1], boardState)
+                        let whiteInCheck = validateCheck(true, whiteKing[0], whiteKing[1], newState)
+                        let blackInCheck = validateCheck(false, blackKing[0], blackKing[1], newState)
     
                         if (whiteInCheck || blackInCheck) {
                             //let the move go through, but chide the player
                             doPopUp("You can't stop time while a king is in check!")
+                            setActiveSpell("")
                         } else {
                             newTurn = turn + "TS" //take another turn :)
                             //TS tells the backend that timestop was used
