@@ -1,12 +1,12 @@
 :root {
   /* game board should always be exactly sized to 8 x 8 of the game squares */
-  --game-board-size: 87.5vw; /* 800px */
-  --game-board-max: 608px; /* 63vh */
+  --game-board-size: 87.5vw;
+  --game-board-max: 608px;
   --board-background-size: 100vw;
-  --board-background-max: 696px; /* 72vh */
+  --board-background-max: 696px;
   --timer-size: 15vw;
-  --timer-max: 12vh;
-  --spell-max: 12vh;
+  --timer-max: 120px;
+  --spell-max: 100px;
   --dot-size: 25px;
 }
 
@@ -98,10 +98,6 @@ body {
 .time-text {
   font-size: larger;
   margin: auto;
-  /* margin-top: calc(var(--timer-size) * 0.3);
-  margin-bottom: auto;
-  margin-right: auto;
-  margin-left: auto; */
   color: white;
   text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
   font-family: "Poppins", sans-serif;
@@ -115,13 +111,15 @@ body {
 }
 
 .spell-button:hover {
-  max-width: calc(var(--spell-max) + 1vh);
-  max-height: calc(var(--spell-max) + 1vh);
+  max-width: calc(var(--spell-max) + 10px);
+  max-height: calc(var(--spell-max) + 10px);
 }
 
 .enemy-spell {
   max-width: calc(var(--spell-max) / 1.5);
   max-height: calc(var(--spell-max) / 2);
+  min-width: 60px;
+  min-height: 60px;
 }
 
 .spell-highlight {
@@ -224,8 +222,10 @@ body {
 }
 
 .rules-piece {
-  height: 5vh;
-  width: 5vh;
+  height: 20vw;
+  width: 20vw;
+  max-height: 50px;
+  max-width: 50px;
 }
 
 /* MUI overrides */
