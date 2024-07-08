@@ -2,6 +2,8 @@ import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 
+import Spinner from "react-bootstrap/Spinner"
+
 import { TextField } from "@mui/material"
 import { Button } from "@mui/material"
 
@@ -101,13 +103,30 @@ function CreateUser() {
     )
 }
 
-function LoginField() {
+function Loading() {
+    return (
+        <div className="modal-overlay">
+            <div className="loading-modal">
+                <Container>
+                    <Col className="text-center">
+                        <Spinner animation="border" variant="dark"/>
+                    </Col>
+                </Container>
+            </div>
+        </div>
+    )
+}
+
+function LoginField(props) {
     const { auth } = useContext(AuthContext)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
+    const setLoading = props.setLoading
+
     async function submit() {
-      getToken({auth, username, password})
+        setLoading(true)
+        getToken({auth, username, password, setLoading})
     }
 
     return (
@@ -146,6 +165,7 @@ function LoginField() {
 
 function Login() {
     const [registering, setRegistering] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     let display
     let buttonText
@@ -153,12 +173,18 @@ function Login() {
         display = (<CreateUser/>)
         buttonText = "Have an account?"
     } else {
-        display = (<LoginField/>)
+        display = (<LoginField setLoading={setLoading}/>)
         buttonText = "Need an account?"
+    }
+
+    let loadingModal = (<></>)
+    if (loading) {
+        loadingModal = (<Loading/>)
     }
 
     return (
         <Container className="p-5 text-center text-white">
+            {loadingModal}
             <Title/>
             <br/>
             {display}

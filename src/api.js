@@ -42,16 +42,19 @@ export const createUser = ({username, password, email}) => {
     })
 }
 
-export const getToken = ({ auth, username, password }) => {
+export const getToken = ({ auth, username, password, setLoading }) => {
     axios.post(`${baseUrl}/token/`, {
         username,
         password,
     }).then(response => {
         auth.setAccessToken(response.data.access)
-        // getUserID(response.data.access, auth)
         saveLogin(response.data.access, response.data.refresh)
-    }).catch(error => console.log("ERROR: ", error))
-}
+        setLoading(false)
+    }).catch(error => {
+        console.log("ERROR: ", error)
+        alert("There was an error logging in! Check your entries and try again!")
+        setLoading(false)
+})}
 
 export const fetchUser = ({ auth }) => {
     axios({
